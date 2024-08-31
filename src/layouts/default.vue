@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-main>
+    <v-main >
       <router-view />
     </v-main>
 
@@ -11,3 +11,6 @@
 <script lang="ts" setup>
   //
 </script>
+
+<style scoped>
+</style>

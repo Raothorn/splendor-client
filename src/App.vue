@@ -7,5 +7,14 @@
 </template>
 
 <script lang="ts" setup>
-  //
+import $socket from './socket';
+
+
+onMounted(() => {
+  $socket.connect() 
+})
+
+onBeforeUnmount(() => {
+  $socket.disconnect()
+})
 </script>
