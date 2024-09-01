@@ -8,11 +8,19 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
+    Cards: typeof import('./components/Cards.vue')['default']
+    ContextMenu: typeof import('./components/ContextMenu.vue')['default']
+    Dialogs: typeof import('./components/Dialogs.vue')['default']
     Game: typeof import('./components/Game.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    InfoPanel: typeof import('./components/InfoPanel.vue')['default']
+    MainBoard: typeof import('./components/MainBoard.vue')['default']
+    PlayerInfo: typeof import('./components/PlayerInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TokenBank: typeof import('./components/TokenBank.vue')['default']
     TokenPile: typeof import('./components/TokenPile.vue')['default']
+    Tokens: typeof import('./components/Tokens.vue')['default']
     TurnActions: typeof import('./components/TurnActions.vue')['default']
   }
 }

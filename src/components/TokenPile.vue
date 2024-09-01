@@ -1,33 +1,25 @@
 <template>
-  <v-card
-    class="text-center"
-    :color="isSelected ? 'surface-variant' : 'surface-light'"
+  <v-sheet
+    class="d-flex align-center ma-5 pa-1"
+    :color="isSelected ? 'grey-darken-4' : 'surface-light'"
+    :elevation="ui.isSelectingTokens() ? 5 : 0"
+    :border="ui.isSelectingTokens()"
+    rounded
   >
-    <v-card-title>
-      <v-icon icon="mdi-circle" :color="colorString"></v-icon>
-      <span class="ml-5"> {{ amount }} </span>
-    </v-card-title>
-  </v-card>
+    <img :src="imgUrl" width="50" />
+    <h3 class="ml-5">{{ amount }}</h3>
+  </v-sheet>
 </template>
 
 <script setup lang="ts">
 import { useGameStore, useUiStore } from "@/stores/appStores";
-import { TokenColor } from "@/types/gamestate";
 
 const props = defineProps<{
-  color: TokenColor;
+  color: string;
 }>();
 
 const game = useGameStore();
 const ui = useUiStore();
-
-const colorString = computed(() => {
-  if (props.color == TokenColor.Black) return "black";
-  else if (props.color == TokenColor.White) return "white";
-  else if (props.color == TokenColor.Blue) return "blue";
-  else if (props.color == TokenColor.Green) return "green";
-  else if (props.color == TokenColor.Red) return "red";
-});
 
 const amount = computed(() => {
   return game.getNumTokens(props.color);
@@ -39,5 +31,13 @@ const isSelected = computed(() => {
   } else {
     return false;
   }
+});
+
+const colorString = computed(() => {
+  return props.color.toLowerCase();
+});
+
+const imgUrl = computed(() => {
+  return `./public/assets/token_${props.color.toLowerCase()}.png`;
 });
 </script>

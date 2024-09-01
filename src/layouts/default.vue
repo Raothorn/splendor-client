@@ -1,15 +1,12 @@
 <template>
   <v-app>
     <v-main >
-      <router-view />
+      <router-view class="full-width"/>
     </v-main>
-
-    <AppFooter />
   </v-app>
 </template>
 
 <script lang="ts" setup>
-  //
 </script>
 
 <style scoped>

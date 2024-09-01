@@ -1,24 +1,18 @@
 export type Game = {
-  tokenPiles: Map<TokenColor, number>;
+  _player: Player
+  _tokenPiles: TokenPiles
 };
 
-export enum TokenColor {
-  Black,
-  White,
-  Blue,
-  Green,
-  Red,
+export type Player = {
+  _playerTokens: TokenPiles
 }
 
-// TEMP
-export function newGame(): Game {
-  return {
-    tokenPiles: new Map<TokenColor, number>([
-      [TokenColor.Black, 10],
-      [TokenColor.White, 10],
-      [TokenColor.Blue, 10],
-      [TokenColor.Green, 10],
-      [TokenColor.Red, 10],
-    ]),
-  };
+export type TokenPiles = [string, number][]
+
+export function lookupTokens(piles: TokenPiles, color: string) {
+  let [_, amt] = piles.find((t) => t[0] == color) ?? [ "", 0, ];
+  return amt;
 }
+
+export const tokenColors = [ "Black", "White", "Blue", "Green", "Red" ];
+// TEMP
