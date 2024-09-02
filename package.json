@@ -12,7 +12,9 @@
     "core-js": "^3.37.1",
     "prettier": "^3.3.3",
     "roboto-fontface": "*",
+    "toastify-js": "^1.12.0",
     "vue": "^3.4.31",
+    "vue3-toastify": "^0.2.2",
     "vuetify": "^3.6.11"
   },
   "devDependencies": {

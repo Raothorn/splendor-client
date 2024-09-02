@@ -8,7 +8,7 @@
             <template v-for="color in ['Black', 'Red', 'Green']">
               <div class="d-flex align-center">
                 <img :src="getImgUrl(color)" />
-                <h4> {{  game.getPlayerTokens(color) }} + 0 </h4>
+                <h4> {{ tokenDisplay(color) }} </h4>
               </div>
             </template>
           </div>
@@ -16,12 +16,9 @@
             <template v-for="color in ['White', 'Blue', 'Gold']">
               <div class="d-flex align-center">
                 <img :src="getImgUrl(color)" />
-                <h4> {{  game.getPlayerTokens(color) }} + 0 </h4>
+                <h4> {{ tokenDisplay(color) }} </h4>
               </div>
             </template>
-          </div>
-          <div class="ma-auto">
-            <v-btn >See developments</v-btn>
           </div>
         </div>
       </v-card-text>
@@ -34,6 +31,13 @@ import { useGameStore } from '@/stores/appStores';
 
 
 const game = useGameStore()
+
+function tokenDisplay(color: string) {
+  let playerTokens = game.getPlayerTokens(color);
+  let devValue = game.getPlayerDevelopmentValue(color);
+
+  return `${playerTokens} + ${devValue} = ${playerTokens + devValue}`
+}
 
 function getImgUrl(color: string) {
   return `/public/assets/token_${color.toLowerCase()}.png`;

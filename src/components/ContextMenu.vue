@@ -4,6 +4,9 @@
       <div class="btn-container" v-if="ui.isSelectingTokens()">
         <v-btn @click="ui.acquireTokens" block variant="tonal">Acquire tokens</v-btn>
       </div>
+      <div class="btn-container" v-else-if="ui.isPurchasingDevelopment">
+        <v-btn @click="ui.submitPurchaseDevelopment" block variant="tonal">Purchase development</v-btn>
+      </div>
       <div class="btn-container" v-else>
         <v-btn block @click="dialogActive = true"  variant="tonal">
           Choose Action
@@ -16,6 +19,9 @@
       <v-card-title class="text-center">Choose action</v-card-title>
       <v-card-actions>
         <div class="w-100 d-flex flex-column justify-space-evenly">
+          <v-btn block variant="tonal" @click="purchaseDevelopment">
+            Purchase Development
+          </v-btn>
           <v-btn block variant="tonal" @click="take3">
             Take 3 gem tokens of different colors
           </v-btn>
@@ -34,6 +40,12 @@ import { useUiStore } from "@/stores/appStores";
 const ui = useUiStore();
 
 const dialogActive = ref(false);
+
+function purchaseDevelopment() {
+  ui.isPurchasingDevelopment = true
+  ui.selectedDevelopment = -1
+  dialogActive.value = false;
+}
 
 function take3() {
   ui.selectedTokens = new Set<String>();
@@ -57,4 +69,5 @@ function take2() {
 .btn_container {
   width: 100%;
 }
+
 </style>

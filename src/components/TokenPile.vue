@@ -22,7 +22,7 @@ const game = useGameStore();
 const ui = useUiStore();
 
 const amount = computed(() => {
-  return game.getNumTokens(props.color);
+  return game.getBankTokens(props.color);
 });
 
 const isSelected = computed(() => {

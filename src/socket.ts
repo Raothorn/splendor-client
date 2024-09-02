@@ -1,4 +1,6 @@
 import { Game } from "./types/gamestate";
+import { toast } from "vue3-toastify";
+import 'vue3-toastify/dist/index.css';
 
 class SocketManager {
   private _onStateUpdate: (gs: Game) => void;
@@ -24,10 +26,26 @@ class SocketManager {
       if (message.msgType == "StateUpdate") {
         this._onStateUpdate(message.msgData)
       }
+      else if (message.msgType == "ErrorNotification") {
+        toast(message.msgData, {
+          theme: "dark",
+          type: "error",
+          autoClose: 1000,
+        }); // ToastOptions
+
+
+      }
     };
   }
 
   disconnect() {
+    toast("You are disconnected from the server. Please refresh", {
+      theme: "dark",
+      type: "error",
+      autoClose: false
+    })
+    console.log('hell')
+    console.log('hell')
     this.socket.close();
   }
 
