@@ -1,21 +1,14 @@
 <template>
-  <v-sheet
-    class="d-flex align-center ma-5 pa-1"
-    :color="isSelected ? 'grey-darken-4' : 'surface-light'"
-    :elevation="ui.isSelectingTokens() ? 5 : 0"
-    :border="ui.isSelectingTokens()"
-    rounded
-  >
-    <img :src="imgUrl" width="50" />
+  <div class="token-pile" :class="isSelected ? 'selected' : ''">
+    <img class="token-icon" :src="imgUrl"  />
     <h3 class="ml-5">{{ amount }}</h3>
-  </v-sheet>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useGameStore, useUiStore } from "@/stores/appStores";
 
-const props = defineProps<{
-  color: string;
+const props = defineProps<{ color: string;
 }>();
 
 const game = useGameStore();
@@ -26,18 +19,31 @@ const amount = computed(() => {
 });
 
 const isSelected = computed(() => {
-  if (ui.selectedTokens != null) {
-    return ui.selectedTokens.has(props.color);
-  } else {
-    return false;
-  }
-});
-
-const colorString = computed(() => {
-  return props.color.toLowerCase();
+  return ui.getSelectedTokens.has(props.color)
 });
 
 const imgUrl = computed(() => {
   return `./public/assets/token_${props.color.toLowerCase()}.png`;
 });
 </script>
+
+
+<style scoped>
+/* small screens and up */
+.token-pile {
+  padding: 2px 6px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.token-icon {
+  max-width: 24px;
+  max-height:24px;
+  margin: auto 5px;
+}
+.selected {
+  background-color: rgba(255, 255,255, 0.2);
+}
+</style>

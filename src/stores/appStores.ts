@@ -1,84 +1,189 @@
-import { Game, lookupTokens } from "@/types/gamestate";
-import { defineStore } from "pinia";
 import $socket from "@/socket";
+import { GameState, Guid, lookupTokens, Player } from "@/types/gamestate";
+import { defineStore } from "pinia";
 
-export const useGameStore = defineStore("game", () => {
-  const game: Ref<Game | null> = ref(null);
+export const useAppStore = defineStore("app", () => {
+  // Properties
+  const lobbyPlayers: Ref<string[]> = ref([])
+  const username: Ref<string | null> = ref(null)
+
+  // Actions
+  function attemptJoinLobby(_username: string) {
+    $socket.attemptJoinLobby(_username)
+  }
+
+  function startGame() {
+    $socket.startGame()
+  }
+
+  // Getters
+  const isJoined = computed(() => {
+    return username.value != null
+  })
+
 
   onMounted(() => {
-    $socket.onStateUpdate((newState: Game) => {
-      console.log("updating state", newState);
-      game.value = newState;
-    });
+    $socket.onLobbyJoinSuccess((_username) => {
+      username.value = _username
+    })
 
-    $socket.connect();
-  });
+    $socket.onLobbyUpdate((players) => {
+      lobbyPlayers.value = players
+    })
+
+    $socket.connect()
+  })
 
   onBeforeUnmount(() => {
-    $socket.disconnect();
-  });
+    console.log("Disconnecting socket before unmounting store")
+    $socket.disconnect()
+  })
+
+  return {
+    lobbyPlayers,
+    username,
+    attemptJoinLobby,
+    startGame,
+    isJoined,
+  };
+});
+
+export const useGameStore = defineStore("game", () => {
+  const game: Ref<GameState | null> = ref(null)
+
+  //Helpers
+
+  // Actions
+
+  // Getters
+  const isGameStarted = computed(() => {
+    return game.value != null
+  })
+
+  const getPlayers = computed(()  => {
+    let playersMap = game.value?.players ?? {}
+    let players =  Object.values(playersMap) as Player[]
+
+    players.sort((a, b) => a.turnOrder - b.turnOrder)
+
+    return players
+  })
+
+  const getCurrentPlayer = computed(() => {
+    return game.value?.currentPlayer ?? ""
+  })
 
   const getBankTokens = computed(() => {
     return (color: string) => {
-      let piles = game.value?._tokenBank ?? [];
-      return lookupTokens(piles, color);
-    };
-  });
-
-  const getPlayerTokens = computed(() => {
-    return (color: string) => {
-      let piles = game.value?._player.tokens ?? [];
-      return lookupTokens(piles, color);
-    };
-  });
-
-  const getPlayerDevelopmentValue = computed(() => {
-    return (color: string) => {
-      let tokens = game.value?._player.developments ?? [];
-      return tokens.filter(t => t.developmentGem == color).length
+      let tokens = game.value?.tokenBank ?? []
+      return lookupTokens(tokens, color)
     }
   })
 
-  const getDevelopmentCards = computed(() => {
+  const getShownDevelopments = computed(() => {
     return (deckIx: number) => {
-      return game.value?._developmentDecks[deckIx][1] ?? [];
-    }
-  });
-
-  const unshownDevelopmentCardsAmt = computed(() => {
-    return (deckIx: number) => {
-      let deck = game.value?._developmentDecks[deckIx][0] ?? []
-      return deck.length
+      return game.value?.decks[deckIx][1] ?? [];
     }
   })
 
-  // Exporting game for debugging purposes, but shouldn't be accessed
+  // Event hooks
+  onMounted(() => {
+    $socket.onStateUpdate((update) => {
+      // If this is the first state update the client is recieving, send an ack.
+      if (game.value == null) {
+        $socket.sendReady()
+      }
+
+      game.value = update;
+    })
+  })
+
   return {
+    // Exporting game for debugging reasons
     game,
+
+    // Actions
+    //Getters
+    isGameStarted,
+
+    getCurrentPlayer,
+    getPlayers,
     getBankTokens,
-    getPlayerTokens,
-    getDevelopmentCards,
-    getPlayerDevelopmentValue,
-    unshownDevelopmentCardsAmt,
-  };
-});
+    getShownDevelopments
+  }
+})
 
 export const useUiStore = defineStore("ui", () => {
   const selectedTokens: Ref<Set<String> | null> = ref(null);
   const selectAmount: Ref<number> = ref(0);
 
-  const isSelectingDevelopment: Ref<boolean> = ref(false);
-  const selectedDevelopment: Ref<number> = ref(-1);
+  // (deckIndex, developmentId)
+  const selectedDevelopment: Ref<[number, number] | null> = ref(null);
 
-
-  function isSelectingTokens() {
+  //Getters
+  const isSelectingTokens = computed(() => {
     return selectedTokens.value != null;
+  })
+
+  const getSelectedTokens = computed(() => {
+    let tokens = selectedTokens.value ?? new Set()
+    return tokens
+  })
+
+  const remainingTokens = computed(() => {
+    if (selectedTokens.value) {
+      return selectAmount.value - selectedTokens.value.size
+    } else {
+      return -1
+    }
+  })
+
+  const isSelectingDevelopment = computed(() => {
+    return selectedDevelopment.value != null;
+  })
+
+  const isDevelopmentSelected = computed(() => {
+    return (devId: number) => {
+      if (selectedDevelopment.value) {
+        return selectedDevelopment.value[1] == devId
+      } else {
+        return false
+      }
+    }
+  })
+
+  const doneSelectingDevelopment = computed(() => {
+    if (selectedDevelopment.value) {
+      return selectedDevelopment.value[0] != -1
+            && selectedDevelopment.value[1] != -1
+    } else {
+      return false
+    }
+  })
+
+  //Actions
+  function beginTokenSelect(amount: number) {
+    if (amount == 1 || amount == 3) {
+      selectedTokens.value = new Set()
+      selectAmount.value = amount
+    }
+  }
+
+  function toggleTokenSelected(color: string) {
+    if (selectedTokens.value) {
+      if (selectedTokens.value.has(color)) {
+        selectedTokens.value.delete(color)
+      } else if (selectedTokens.value.size < selectAmount.value) {
+        // Only add selection if less than the desired amount are selected
+        selectedTokens.value.add(color)
+      }
+    }
   }
 
   function submitAcquireTokens() {
     if (selectedTokens.value) {
       $socket.sendAction(
-        "AcquireTokensAction",
+        "AcquireTokens",
         Array.from(selectedTokens.value),
       );
       selectedTokens.value = null;
@@ -86,21 +191,43 @@ export const useUiStore = defineStore("ui", () => {
     }
   }
 
+  function beginDevelopmentSelect() {
+    selectedDevelopment.value = [-1, -1]
+  }
+
+  function toggleDevelopmentSelected(deckIx: number, devId: number) {
+    if (selectedDevelopment.value) {
+      if (selectedDevelopment.value[1] == devId) {
+        selectedDevelopment.value = [-1, -1]
+      } else {
+        selectedDevelopment.value = [deckIx, devId]
+      }
+    }
+  }
+
   function submitPurchaseDevelopment() {
-    if (isSelectingDevelopment.value && selectedDevelopment.value != -1) {
-      $socket.sendAction("PurchaseDevelopmentAction", [0, selectedDevelopment.value])
-      isSelectingDevelopment.value = false
-      selectedDevelopment.value = -1
+    if (selectedDevelopment.value && doneSelectingDevelopment.value) {
+      $socket.sendAction("PurchaseDevelopment", selectedDevelopment.value)
+      selectedDevelopment.value = null;
     }
   }
 
   return {
-    selectedTokens,
-    selectAmount,
-    selectedDevelopment,
-    isPurchasingDevelopment: isSelectingDevelopment,
-    submitPurchaseDevelopment,
+    //Getters
     isSelectingTokens,
-    acquireTokens: submitAcquireTokens,
+    getSelectedTokens,
+    remainingTokens,
+
+    isSelectingDevelopment,
+    isDevelopmentSelected,
+    doneSelectingDevelopment,
+    // Actions
+    beginTokenSelect,
+    toggleTokenSelected,
+    submitAcquireTokens,
+
+    beginDevelopmentSelect,
+    toggleDevelopmentSelected,
+    submitPurchaseDevelopment,
   };
 });

@@ -1,13 +1,24 @@
-export type Game = {
-  _player: Player
-  _tokenBank: TokenPiles
-  _developmentDecks: [number[], number[]][]
-};
+export type GameState = {
+  players: Map<string, Player>,
+  tokenBank: TokenPiles
+  decks: [number[], number[]][]
+  currentPlayer: string
+}
+
+export type LobbyState = {
+  lobbyPlayers: string[]
+}
 
 export type Player = {
   tokens: TokenPiles
+  gold: number
   developments: Development[]
+  victoryPoints: number
+  turnOrder: number
+  username: string
 }
+
+export type Guid = string
 
 export type TokenPiles = [string, number][]
 
@@ -23,6 +34,4 @@ export function lookupTokens(piles: TokenPiles, color: string) {
   return amt;
 }
 
-
 export const tokenColors = [ "Black", "White", "Blue", "Green", "Red" ];
-// TEMP

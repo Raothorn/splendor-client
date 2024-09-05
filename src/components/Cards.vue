@@ -1,62 +1,25 @@
 <template>
-  <v-card class="container fill-height" color="surface-light">
-    <div class="fill-height d-flex flex-column justify-space-around">
-      <div class="d-flex">
-        <v-sheet class="card card-back" rounded elevation="10">
-          <img
-            src="/public/assets/developments_1/back_3.png"
-            :class="game.unshownDevelopmentCardsAmt(2) == 0 ? 'hidden' : ''"
-          />
-        </v-sheet>
-        <v-sheet
-          class="card"
-          v-for="cardId in game.getDevelopmentCards(2)"
-          rounded
-          :class="isSelected(cardId) ? 'selected' : ''"
-          @click="selectCard(cardId)"
-          :elevation="isSelected(cardId) ? 6 : 3"
-        >
-          <img :src="getCardImgUrl(cardId)" />
-        </v-sheet>
-      </div>
-      <div class="d-flex">
-        <v-sheet class="card card-back" rounded elevation="10">
-          <img
-            src="/public/assets/developments_1/back_2.png"
-            :class="game.unshownDevelopmentCardsAmt(1) == 0 ? 'hidden' : ''"
-          />
-        </v-sheet>
-        <v-sheet
-          class="card"
-          v-for="cardId in game.getDevelopmentCards(1)"
-          rounded
-          :class="isSelected(cardId) ? 'selected' : ''"
-          @click="selectCard(cardId)"
-          :elevation="isSelected(cardId) ? 6 : 3"
-        >
-          <img :src="getCardImgUrl(cardId)" />
-        </v-sheet>
-      </div>
-      <div class="d-flex">
-        <v-sheet class="card card-back" rounded elevation="10">
-          <img
-            src="/public/assets/developments_1/back_1.png"
-            :class="game.unshownDevelopmentCardsAmt(0) == 0 ? 'hidden' : ''"
-          />
-        </v-sheet>
-        <v-sheet
-          class="card"
-          v-for="cardId in game.getDevelopmentCards(0)"
-          rounded
-          :class="isSelected(cardId) ? 'selected' : ''"
-          @click="selectCard(cardId)"
-          :elevation="isSelected(cardId) ? 6 : 3"
-        >
-          <img :src="getCardImgUrl(cardId)" />
-        </v-sheet>
-      </div>
-    </div>
-  </v-card>
+  <v-sheet class="cards-panel" color="surface">
+    <ul>
+      <template v-for="index in 3" :key="index">
+        <li>
+          <div class="card-back development-card">
+            <img :src="getCardBackImg(3 - index)" alt="" />
+          </div>
+        </li>
+        <li class="divider"></li>
+        <li v-for="devId in game.getShownDevelopments(3 - index)">
+          <div
+            class="development-card"
+            :class="ui.isDevelopmentSelected(devId) ? 'selected' : 'unselected'"
+            @click="ui.toggleDevelopmentSelected(3 - index, devId)"
+          >
+            <img :src="getDevelopmentImg(devId)" alt="" />
+          </div>
+        </li>
+      </template>
+    </ul>
+  </v-sheet>
 </template>
 
 <script setup lang="ts">
@@ -65,54 +28,69 @@ import { useGameStore, useUiStore } from "@/stores/appStores";
 const game = useGameStore();
 const ui = useUiStore();
 
-function selectCard(index: number) {
-  if (ui.isPurchasingDevelopment) {
-    console.log(index);
-    // Toggle selected
-    if (ui.selectedDevelopment == index) {
-      ui.selectedDevelopment = -1;
-    } else {
-      ui.selectedDevelopment = index;
-    }
-  }
+function getDevelopmentImg(devId: number) {
+  return `/public/assets/developments_1/${devId}.png`;
 }
 
-function isSelected(index: number) {
-  return ui.isPurchasingDevelopment && ui.selectedDevelopment == index;
+function getCardBackImg(deckIndex: number) {
+  return `/public/assets/developments_1/back_${deckIndex + 1}.png`;
 }
 
-function getCardImgUrl(index: number) {
-  return `/public/assets/developments_1/${index}.png`;
-}
+// function getCardImgUrl(index: number) {
+//   return `/public/assets/developments_1/${index}.png`;
+// }
 </script>
 
 <style scoped>
+/* reset */
 img {
+  display: block;
+  max-width: 100%;
   max-height: 100%;
-  max-width: auto;
 }
-
-.card {
-  height: 15vh;
-  overflow: hidden;
-  margin-right: 10px;
-}
-
-.card-back {
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
-.card-group {
-  width: 100%;
-  margin-right: 10px;
+li,
+ul {
+  list-style-type: none;
 }
 
 .selected {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  /* border: 2px solid black; */
+}
+.unselected {
+  border: 1px solid black;
 }
 
-.hidden {
-  visibility: hidden;
+/* small screens and up */
+.cards-panel {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+.cards-panel ul {
+  display: grid;
+  padding: 10px 0px;
+  grid-template-columns: 1fr 3px 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: repeat(3, 33%);
+  grid-gap: 5px;
+}
+.dummy {
+  grid-column: span 7;
+  grid-row: span 1;
+}
+.divider {
+  grid-column: 2/3;
+  grid-row: span 1;
+  width: 2px;
+}
+.development-card {
+  border-radius: 20px;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+.development-card img {
+  max-height: 100%;
+  max-width: 100%;
 }
 </style>
