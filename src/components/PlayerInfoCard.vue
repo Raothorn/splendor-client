@@ -20,7 +20,7 @@
             <li>
               <img
                 class="token-icon"
-                src="/public/assets/token_icon.png"
+                src="/assets/token_icon.png"
                 alt=""
               />
             </li>
@@ -31,7 +31,7 @@
             <li>
               <img
                 class="card-icon"
-                src="/public/assets/developments_1/back_1.png"
+                src="/assets/developments_1/back_1.png"
                 alt=""
               />
             </li>
@@ -53,7 +53,7 @@
           <div class="player-gold">
             <img
               class="token-icon"
-              src="/public/assets/token_gold.png"
+              src="/assets/token_gold.png"
               alt=""
             />
             <h4>0</h4>
@@ -65,17 +65,15 @@
 </template>
 
 <script setup lang="ts">
-import { useGameStore, useAppStore } from "@/stores/appStores";
-import { Guid, lookupTokens, Player, tokenColors } from "@/types/gamestate";
+import { useAppStore } from "@/stores/appStores";
+import { lookupTokens, Player, tokenColors } from "@/types/gamestate";
 
 const props = defineProps<{
   player: Player;
 }>();
 
-const game = useGameStore();
 const app = useAppStore();
 
-const showDevelopments: Ref<boolean> = ref(false);
 
 function isYou() {
   return props.player.username == app.username
@@ -91,7 +89,7 @@ function developmentGems(color: string) {
 
 
 function getTokenImgUrl(color: string) {
-  return `/public/assets/token_${color.toLowerCase()}.png`;
+  return `/assets/token_${color.toLowerCase()}.png`;
 }
 </script>
 

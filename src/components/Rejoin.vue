@@ -13,7 +13,7 @@
             <td>
               <div class="d-flex justify-space-between align-end">
                 <h3>{{ player.username }}</h3>
-                <v-btn @click="rejoin(player.username)" variant="tonal">Rejoin</v-btn>
+                <v-btn @click="rejoin(player.username)" variant="tonal" disabled>Rejoin</v-btn>
               </div>
             </td>
           </tr>

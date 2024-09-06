@@ -1,6 +1,7 @@
 import { GameState } from "./types/gamestate";
 import { toast } from "vue3-toastify";
 import 'vue3-toastify/dist/index.css';
+import {v4 as uuidv4} from 'uuid'
 
 class SocketManager {
   private _onLobbyUpdate: (players: string[]) => void
@@ -15,8 +16,15 @@ class SocketManager {
     this._onLobbyUpdate = (_) => {}
     this._onStateUpdate = (_) => {}
     this._onLobbyJoinSuccess = () => {}
-    this.guid = crypto.randomUUID().toString()
-    this.socket = new WebSocket("ws://localhost:9001/");
+    this.guid = uuidv4()
+
+    let mode = import.meta.env.MODE;
+    console.log("MODE: ", mode)
+    if (mode == "development") {
+      this.socket = new WebSocket("ws://localhost:9001")
+    } else {
+      this.socket = new WebSocket("http://ops-foundry.com/splendorws");
+    }
   }
 
   connect() {
@@ -60,10 +68,10 @@ class SocketManager {
   }
 
   onLobbyUpdate(fn: (players: string[]) => void){
-    this._onLobbyUpdate = fn 
+    this._onLobbyUpdate = fn
   }
 
-  onStateUpdate(fn: (gs: AppState) => void) {
+  onStateUpdate(fn: (gs: GameState) => void) {
     this._onStateUpdate = fn;
   }
 

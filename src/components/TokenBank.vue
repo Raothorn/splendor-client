@@ -8,11 +8,10 @@
 </template>
 
 <script setup lang="ts">
-import { useGameStore, useUiStore } from "@/stores/appStores";
+import { useUiStore } from "@/stores/appStores";
 import TokenPile from "./TokenPile.vue";
 import { tokenColors } from "@/types/gamestate";
 
-const game = useGameStore();
 const ui = useUiStore();
 
 function tokenClicked(color: string) {

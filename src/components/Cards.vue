@@ -29,16 +29,13 @@ const game = useGameStore();
 const ui = useUiStore();
 
 function getDevelopmentImg(devId: number) {
-  return `/public/assets/developments_1/${devId}.png`;
+  return `./assets/developments_1/${devId}.png`;
 }
 
 function getCardBackImg(deckIndex: number) {
-  return `/public/assets/developments_1/back_${deckIndex + 1}.png`;
+  return `./assets/developments_1/back_${deckIndex + 1}.png`;
 }
 
-// function getCardImgUrl(index: number) {
-//   return `/public/assets/developments_1/${index}.png`;
-// }
 </script>
 
 <style scoped>

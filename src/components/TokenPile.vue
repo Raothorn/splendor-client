@@ -23,7 +23,7 @@ const isSelected = computed(() => {
 });
 
 const imgUrl = computed(() => {
-  return `./public/assets/token_${props.color.toLowerCase()}.png`;
+  return `./assets/token_${props.color.toLowerCase()}.png`;
 });
 </script>
 

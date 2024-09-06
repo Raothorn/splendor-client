@@ -1,5 +1,5 @@
 import $socket from "@/socket";
-import { GameState, Guid, lookupTokens, Player } from "@/types/gamestate";
+import { GameState, lookupTokens, Player } from "@/types/gamestate";
 import { defineStore } from "pinia";
 
 export const useAppStore = defineStore("app", () => {
