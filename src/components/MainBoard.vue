@@ -43,6 +43,6 @@ import ContextButton from "./ContextButton.vue";
   grid-row: span 3;
 
   display: grid;
-  grid-template-columns: 4fr 1fr;
+  grid-template-columns: 4fr 200px;
 }
 </style>

@@ -12,7 +12,8 @@ export type LobbyState = {
 export type Player = {
   tokens: TokenPiles
   gold: number
-  developments: Development[]
+  ownedDevelopments: DevelopmentId[]
+  reservedDevelopments: DevelopmentId[]
   victoryPoints: number
   turnOrder: number
   username: string
@@ -21,11 +22,6 @@ export type Player = {
 export type Guid = string
 
 export type TokenPiles = [string, number][]
-
-type Development = {
-  developmentId: DevelopmentId
-  developmentGem: string
-}
 
 type DevelopmentId = number
 

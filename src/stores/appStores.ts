@@ -113,20 +113,21 @@ export const useGameStore = defineStore("game", () => {
   }
 })
 
+export enum SelectDevelopmentMode { Purchase, Reserve, None }
 export const useUiStore = defineStore("ui", () => {
   const selectedTokens: Ref<Set<String> | null> = ref(null);
   const selectAmount: Ref<number> = ref(0);
 
   // (deckIndex, developmentId)
   const selectedDevelopment: Ref<[number, number] | null> = ref(null);
+  const selectDevelopmentMode: Ref<SelectDevelopmentMode> = ref(SelectDevelopmentMode.None)
 
   //Getters
   const isSelectingTokens = computed(() => {
     return selectedTokens.value != null;
   })
 
-  const getSelectedTokens = computed(() => {
-    let tokens = selectedTokens.value ?? new Set()
+  const getSelectedTokens = computed(() => { let tokens = selectedTokens.value ?? new Set()
     return tokens
   })
 
@@ -138,8 +139,8 @@ export const useUiStore = defineStore("ui", () => {
     }
   })
 
-  const isSelectingDevelopment = computed(() => {
-    return selectedDevelopment.value != null;
+  const getSelectDevelopmentMode = computed(() => {
+    return selectDevelopmentMode.value
   })
 
   const isDevelopmentSelected = computed(() => {
@@ -191,7 +192,8 @@ export const useUiStore = defineStore("ui", () => {
     }
   }
 
-  function beginDevelopmentSelect() {
+  function beginDevelopmentSelect(mode: SelectDevelopmentMode) {
+    selectDevelopmentMode.value = mode;
     selectedDevelopment.value = [-1, -1]
   }
 
@@ -205,11 +207,17 @@ export const useUiStore = defineStore("ui", () => {
     }
   }
 
-  function submitPurchaseDevelopment() {
+  function submitDevelopmentAction() {
     if (selectedDevelopment.value && doneSelectingDevelopment.value) {
-      $socket.sendAction("PurchaseDevelopment", selectedDevelopment.value)
-      selectedDevelopment.value = null;
+      if (selectDevelopmentMode.value == SelectDevelopmentMode.Purchase) {
+        $socket.sendAction("PurchaseDevelopment", selectedDevelopment.value)
+      } 
+      else if (selectDevelopmentMode.value == SelectDevelopmentMode.Reserve) {
+        $socket.sendAction("ReserveDevelopment", selectedDevelopment.value)
+      }
     }
+    selectDevelopmentMode.value = SelectDevelopmentMode.None;
+    selectedDevelopment.value = null;
   }
 
   return {
@@ -218,7 +226,7 @@ export const useUiStore = defineStore("ui", () => {
     getSelectedTokens,
     remainingTokens,
 
-    isSelectingDevelopment,
+    getSelectDevelopmentMode,
     isDevelopmentSelected,
     doneSelectingDevelopment,
     // Actions
@@ -228,6 +236,6 @@ export const useUiStore = defineStore("ui", () => {
 
     beginDevelopmentSelect,
     toggleDevelopmentSelected,
-    submitPurchaseDevelopment,
+    submitDevelopmentAction,
   };
 });

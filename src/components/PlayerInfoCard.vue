@@ -1,9 +1,11 @@
 <template>
-  <v-card class="fill-height">
-    <v-card-title> 
-      <h3> Player {{ player.username }} </h3>
-      <h4 :class="isYou() ? '' : 'hidden'"> (you) </h4>
+  <v-card class="">
+    <v-card-title>
+      <h3>Player {{ player.username }}</h3>
     </v-card-title>
+    <v-card-subtitle>
+      <h4 :class="isYou() ? '' : 'hidden'">(you)</h4>
+    </v-card-subtitle>
     <v-card-text>
       <div class="player-card">
         <div class="token-grid">
@@ -18,11 +20,7 @@
             </li>
 
             <li>
-              <img
-                class="token-icon"
-                src="/assets/token_icon.png"
-                alt=""
-              />
+              <img class="token-icon" src="/assets/token_icon.png" alt="" />
             </li>
             <li v-for="color in tokenColors">
               <h5>{{ tokenGems(color) }}</h5>
@@ -51,12 +49,27 @@
         <div class="player-footer">
           <h4>VP: 0</h4>
           <div class="player-gold">
-            <img
-              class="token-icon"
-              src="/assets/token_gold.png"
-              alt=""
-            />
-            <h4>0</h4>
+            <img class="token-icon" src="/assets/token_gold.png" alt="" />
+            <h4> {{ tokenGems("Gold")  }}</h4>
+          </div>
+          <div class="player-reserved-developments">
+            <p>Reserved developments</p>
+            <ul>
+              <li v-for="reserved in player.reservedDevelopments.slice(0,4)">
+                <v-tooltip activator="parent">
+                  <img
+                    :src="`/assets/developments_1/${reserved}.png`"
+                  />
+                </v-tooltip>
+                <img
+                  class="development-icon"
+                  :src="`/assets/developments_1/${reserved}.png`"
+                />
+              </li>
+              <li v-if="player.reservedDevelopments.length > 4">
+                <v-icon icon="mdi-dots-horizontal-circle-outline"></v-icon>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -74,9 +87,8 @@ const props = defineProps<{
 
 const app = useAppStore();
 
-
 function isYou() {
-  return props.player.username == app.username
+  return props.player.username == app.username;
 }
 
 function tokenGems(color: string) {
@@ -86,7 +98,6 @@ function tokenGems(color: string) {
 function developmentGems(color: string) {
   return 0;
 }
-
 
 function getTokenImgUrl(color: string) {
   return `/assets/token_${color.toLowerCase()}.png`;
@@ -112,14 +123,19 @@ li {
 .v-card-title h4 {
   margin-bottom: 0;
 }
+.v-card-subtitle {
+  text-align: center;
+}
 .v-card-text {
   padding: 10px 0;
   margin: 0px 10px;
 }
 .player-card {
-  height: 100%;
   display: flex;
   align-items: start;
+}
+.token-grid {
+  margin-right: 10px;
 }
 .token-grid ul {
   display: grid;
@@ -150,27 +166,46 @@ h5 {
 
 .player-footer {
   height: 90px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
   margin-left: 4px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 .player-footer h4 {
   font-size: 1.4rem;
+  margin: auto 0px;
 }
-
 .player-gold {
   display: flex;
+  margin: 0px auto;
   justify-content: start;
   align-items: center;
 }
 .player-gold .token-icon {
   margin: 0px 3px;
 }
+.player-reserved-developments {
+  border: 1px solid gray;
+  grid-column: span 2;
+  padding: 0px 2px;
+}
+.player-reserved-developments p {
+  font-size: 0.8rem;
+}
+.player-reserved-developments ul {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.player-reserved-developments li {
+  margin: 0px 2px;
+}
+.development-icon {
+  max-width: 20px;
+}
 
 /*if there is enough height to put the footer at the bottom*/
-@media (min-height: 800px) {
+/* @media (min-height: 800px) {
   .player-card {
     flex-direction: column;
   }
@@ -181,5 +216,6 @@ h5 {
     flex-direction: row;
     justify-content: space-between;
   }
-}
+} */
+
 </style>

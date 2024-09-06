@@ -18,15 +18,20 @@
     </div>
   </v-btn>
   <v-btn
-    v-else-if="ui.isSelectingDevelopment"
-    @click="ui.submitPurchaseDevelopment"
+    v-else-if="ui.getSelectDevelopmentMode != SelectDevelopmentMode.None"
+    @click="ui.submitDevelopmentAction"
     class="action-button"
     block
     :disabled="!ui.doneSelectingDevelopment"
   >
     <div class="button-contents">
       <template v-if="ui.doneSelectingDevelopment">
-        <h3>Purchase</h3>
+        <template v-if="ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase">
+          <h3>Purchase</h3>
+        </template>
+        <template v-else-if="ui.getSelectDevelopmentMode == SelectDevelopmentMode.Reserve">
+          <h3>Reserve</h3>
+        </template>
         <h3>development</h3>
       </template>
       <template v-else>
@@ -58,6 +63,9 @@
           <v-btn block variant="tonal" @click="purchaseDevelopment">
             Purchase Development
           </v-btn>
+          <v-btn block variant="tonal" @click="reserveDevelopment">
+            Reserve Development
+          </v-btn>
           <v-btn block variant="tonal" @click="take3">
             Take 3 gem tokens of different colors
           </v-btn>
@@ -71,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useGameStore, useUiStore } from "@/stores/appStores";
+import { SelectDevelopmentMode, useAppStore, useGameStore, useUiStore } from "@/stores/appStores";
 
 const game = useGameStore();
 const app = useAppStore();
@@ -85,7 +93,12 @@ const yourTurn = computed(() => {
 });
 
 function purchaseDevelopment() {
-  ui.beginDevelopmentSelect();
+  ui.beginDevelopmentSelect(SelectDevelopmentMode.Purchase);
+  dialogActive.value = false;
+}
+
+function reserveDevelopment() {
+  ui.beginDevelopmentSelect(SelectDevelopmentMode.Reserve);
   dialogActive.value = false;
 }
 

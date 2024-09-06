@@ -18,9 +18,10 @@ const game = useGameStore();
 /* small screens */
 .player-info-panel {
   height: 100%;
+  overflow-x: scroll;
   display: flex;
   justify-content: center;
-  align-content: center;
+  align-items: center;
   padding: 10px 0px;
 }
 .player-card {
