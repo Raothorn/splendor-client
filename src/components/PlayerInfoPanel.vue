@@ -1,6 +1,6 @@
 <template>
   <v-sheet class="player-info-panel" color="surface-light">
-    <div class="player-card" v-for="player in game.getPlayers">
+    <div class="player-card fill-height" v-for="player in game.getPlayers">
       <PlayerInfoCard :player="player"></PlayerInfoCard>
     </div>
   </v-sheet>

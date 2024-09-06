@@ -30,11 +30,11 @@ class SocketManager {
   private getGuid():string {
 
     const key = "splendor_guid"
-    let result = localStorage.getItem(key)
+    let result = sessionStorage.getItem(key)
 
     if (result == null) {
       result = uuidv4()
-      localStorage.setItem(key, result)
+      sessionStorage.setItem(key, result)
    }
 
    return result

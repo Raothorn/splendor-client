@@ -1,5 +1,5 @@
 <template>
-  <v-card class="">
+  <v-card class="player-info-card">
     <v-card-title>
       <h3>Player {{ player.username }}</h3>
     </v-card-title>
@@ -37,6 +37,23 @@
               <h5>{{ developmentGems(color) }}</h5>
             </li>
 
+            <template v-if="isYou()">
+              <li>
+                <img class="token-icon" src="/assets/token_gold.png" alt="" />
+              </li>
+              <li v-for="color in tokenColors">
+                <v-sheet
+                  @click="ui.allocateGold(color, true)"
+                  v-if="ui.getAllocatedGold(color) > 0"
+                  class="deallocate-gold-btn"
+                  elevation="24"
+                >
+                  <h5>{{ ui.getAllocatedGold(color) }}</h5>
+                </v-sheet>
+                <h5 v-else>0</h5>
+              </li>
+            </template>
+
             <div class="row-divider"></div>
             <li>
               <h4><v-icon icon="mdi-sigma"></v-icon></h4>
@@ -49,17 +66,49 @@
         <div class="player-footer">
           <h4>VP: 0</h4>
           <div class="player-gold">
-            <img class="token-icon" src="/assets/token_gold.png" alt="" />
-            <h4> {{ tokenGems("Gold")  }}</h4>
+            <template v-if="isYou() && goldAmt > 0">
+              <v-btn class="allocate-gold-btn" variant="outlined">
+                <img class="token-icon" src="/assets/token_gold.png" alt="" />
+                <h4>{{ goldAmt }}</h4>
+                <v-snackbar
+                  activator="parent"
+                  location-strategy="connected"
+                  location="top center"
+                  target="parent"
+                  open-on-click
+                  :open-on-hover="false"
+                >
+                  <v-card class="w-100">
+                    <v-card-title>Allocate gold</v-card-title>
+                    <v-card-actions>
+                      <div class="d-flex justify-space-evenly ml-2 w-100">
+                        <v-btn
+                          class="px-0 mx-0"
+                          v-for="color in tokenColors"
+                          @click="ui.allocateGold(color)"
+                        >
+                          <img
+                            class="token-icon mx-1"
+                            :src="getTokenImgUrl(color)"
+                          />
+                        </v-btn>
+                      </div>
+                    </v-card-actions>
+                  </v-card>
+                </v-snackbar>
+              </v-btn>
+            </template>
+            <template v-else>
+              <img class="token-icon" src="/assets/token_gold.png" alt="" />
+              <h4>{{ goldAmt }}</h4>
+            </template>
           </div>
           <div class="player-reserved-developments">
             <p>Reserved developments</p>
             <ul>
-              <li v-for="reserved in player.reservedDevelopments.slice(0,4)">
+              <li v-for="reserved in player.reservedDevelopments.slice(0, 4)">
                 <v-tooltip activator="parent">
-                  <img
-                    :src="`/assets/developments_1/${reserved}.png`"
-                  />
+                  <img :src="`/assets/developments_1/${reserved}.png`" />
                 </v-tooltip>
                 <img
                   class="development-icon"
@@ -78,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores/appStores";
+import { useAppStore, useUiStore } from "@/stores/appStores";
 import { lookupTokens, Player, tokenColors } from "@/types/gamestate";
 
 const props = defineProps<{
@@ -86,6 +135,18 @@ const props = defineProps<{
 }>();
 
 const app = useAppStore();
+const ui = useUiStore();
+
+const goldAmt = computed(() => {
+  let totalGold = tokenGems("Gold");
+  if (isYou()) {
+    for (let color of tokenColors) {
+      let allocatedAmt = ui.getAllocatedGold(color);
+      totalGold -= allocatedAmt;
+    }
+  }
+  return totalGold;
+});
 
 function isYou() {
   return props.player.username == app.username;
@@ -115,6 +176,9 @@ li {
 }
 
 /* small screen sizes and up */
+.player-info-card {
+  height: 90%;
+}
 .v-card-title {
   text-align: center;
   font-size: 0.8rem;
@@ -176,8 +240,10 @@ h5 {
   margin: auto 0px;
 }
 .player-gold {
+  min-height: 35px;
+  min-width: 75px;
   display: flex;
-  margin: 0px auto;
+  margin: 5px auto;
   justify-content: start;
   align-items: center;
 }
@@ -185,7 +251,9 @@ h5 {
   margin: 0px 3px;
 }
 .player-reserved-developments {
+  min-height: 60px;
   border: 1px solid gray;
+  border-radius: 4px;
   grid-column: span 2;
   padding: 0px 2px;
 }
@@ -204,6 +272,18 @@ h5 {
   max-width: 20px;
 }
 
+.allocate-gold-btn {
+  border-radius: 20px;
+  margin: 4px 0px;
+}
+.deallocate-gold-btn {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+.v-snackbar__content {
+  padding: 0px;
+}
+
 /*if there is enough height to put the footer at the bottom*/
 /* @media (min-height: 800px) {
   .player-card {
@@ -217,5 +297,4 @@ h5 {
     justify-content: space-between;
   }
 } */
-
 </style>

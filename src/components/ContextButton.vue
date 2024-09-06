@@ -1,63 +1,18 @@
 <template>
   <v-btn
-    v-if="ui.isSelectingTokens"
-    @click="ui.submitAcquireTokens"
-    class="action-button"
-    :disabled="ui.remainingTokens > 0"
-    block
-  >
-    <div class="button-contents">
-      <template v-if="ui.remainingTokens == 0">
-        <h3>Acquire</h3>
-        <h3>Tokens</h3>
-      </template>
-      <template v-else>
-        <h3>Select {{ ui.remainingTokens }}</h3>
-        <h3>more tokens</h3>
-      </template>
-    </div>
-  </v-btn>
-  <v-btn
-    v-else-if="ui.getSelectDevelopmentMode != SelectDevelopmentMode.None"
-    @click="ui.submitDevelopmentAction"
+    @click="buttonData.onClick"
     class="action-button"
     block
-    :disabled="!ui.doneSelectingDevelopment"
+    :disabled="buttonData.disabled"
   >
     <div class="button-contents">
-      <template v-if="ui.doneSelectingDevelopment">
-        <template v-if="ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase">
-          <h3>Purchase</h3>
-        </template>
-        <template v-else-if="ui.getSelectDevelopmentMode == SelectDevelopmentMode.Reserve">
-          <h3>Reserve</h3>
-        </template>
-        <h3>development</h3>
-      </template>
-      <template v-else>
-        <h3>Select</h3>
-        <h3>development</h3>
-      </template>
+      <h3> {{ buttonData.contents }} </h3>
     </div>
-  </v-btn>
-  <v-btn
-    v-else-if="yourTurn"
-    @click="dialogActive = true"
-    class="action-button"
-    block
-  >
-    <div class="button-contents">
-      <h2>Your turn</h2>
-      <h3>Choose action</h3>
-    </div>
-  </v-btn>
-  <v-btn v-else class="action-button" disabled block>
-    <h3>Waiting...</h3>
   </v-btn>
 
-  <v-dialog v-model="dialogActive" max-width="500">
+  <v-dialog v-model="chooseActionDialog" max-width="500">
     <v-card>
-      <v-card-title class="text-center">Choose action</v-card-title>
+      <v-card-title>Choose action</v-card-title>
       <v-card-actions>
         <div class="action-option-buttons">
           <v-btn block variant="tonal" @click="purchaseDevelopment">
@@ -76,6 +31,7 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
 </template>
 
 <script setup lang="ts">
@@ -85,35 +41,89 @@ const game = useGameStore();
 const app = useAppStore();
 const ui = useUiStore();
 
-const dialogActive = ref(false);
+const chooseActionDialog = ref(false);
+const allocateGoldDialog = ref(false)
 
-const yourTurn = computed(() => {
-  console.log(game.getCurrentPlayer, app.username);
+const buttonData = computed(() => {
+  let onClick = () => {};
+  let disabled = false;
+  let contents = "hi";
+
+  if (ui.isSelectingTokens) {
+    if (ui.remainingTokens > 0) {
+      contents = `Select ${ui.remainingTokens} more tokens`
+      disabled = true
+    } else {
+      contents = "Acquire tokens"
+      onClick = ui.submitAcquireTokens
+    }
+  }
+  else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase) {
+    if (ui.doneSelectingDevelopment) {
+      contents = "Purchase Development"
+      onClick = () => ui.submitPurchaseAction()
+    }
+    else {
+      contents = "Select development to purchase"
+      disabled = true
+    }
+  }
+  else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Reserve) {
+    if (ui.doneSelectingDevelopment) {
+      contents = "Reserve development"
+      onClick = () => ui.submitReserveAction()
+    }
+    else {
+      contents = "Select development to reserve"
+      disabled = true
+    }
+  }
+  else if (yourTurn()) {
+    contents = "Your turn Choose action"
+    onClick = () => chooseActionDialog.value = true
+  }
+  else {
+    contents = "Waiting..."
+    disabled=true;
+  }
+
+  return {
+    onClick: onClick,
+    disabled: disabled,
+    contents: contents
+  }
+})
+
+function yourTurn()  {
   return game.getCurrentPlayer == app.username;
-});
+}
 
 function purchaseDevelopment() {
   ui.beginDevelopmentSelect(SelectDevelopmentMode.Purchase);
-  dialogActive.value = false;
+  chooseActionDialog.value = false;
 }
 
 function reserveDevelopment() {
   ui.beginDevelopmentSelect(SelectDevelopmentMode.Reserve);
-  dialogActive.value = false;
+  chooseActionDialog.value = false;
 }
 
 function take3() {
   ui.beginTokenSelect(3);
-  dialogActive.value = false;
+  chooseActionDialog.value = false;
 }
 
 function take2() {
   ui.beginTokenSelect(1);
-  dialogActive.value = false;
+  chooseActionDialog.value = false;
 }
 </script>
 
 <style scoped>
+.v-card-title {
+  text-align: center;
+}
+
 .action-button {
   height: 100%;
 
@@ -126,5 +136,8 @@ function take2() {
 }
 .action-option-buttons .v-btn {
   margin: 2px 0px;
+}
+.button-contents h3 {
+  text-wrap: wrap;
 }
 </style>

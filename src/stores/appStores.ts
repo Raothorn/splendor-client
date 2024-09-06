@@ -1,43 +1,42 @@
 import $socket from "@/socket";
-import { GameState, lookupTokens, Player } from "@/types/gamestate";
+import { GameState, lookupTokens, Player, TokenPiles } from "@/types/gamestate";
 import { defineStore } from "pinia";
 
 export const useAppStore = defineStore("app", () => {
   // Properties
-  const lobbyPlayers: Ref<string[]> = ref([])
-  const username: Ref<string | null> = ref(null)
+  const lobbyPlayers: Ref<string[]> = ref([]);
+  const username: Ref<string | null> = ref(null);
 
   // Actions
   function attemptJoinLobby(_username: string) {
-    $socket.attemptJoinLobby(_username)
+    $socket.attemptJoinLobby(_username);
   }
 
   function startGame() {
-    $socket.startGame()
+    $socket.startGame();
   }
 
   // Getters
   const isJoined = computed(() => {
-    return username.value != null
-  })
-
+    return username.value != null;
+  });
 
   onMounted(() => {
     $socket.onLobbyJoinSuccess((_username) => {
-      username.value = _username
-    })
+      username.value = _username;
+    });
 
     $socket.onLobbyUpdate((players) => {
-      lobbyPlayers.value = players
-    })
+      lobbyPlayers.value = players;
+    });
 
-    $socket.connect()
-  })
+    $socket.connect();
+  });
 
   onBeforeUnmount(() => {
-    console.log("Disconnecting socket before unmounting store")
-    $socket.disconnect()
-  })
+    console.log("Disconnecting socket before unmounting store");
+    $socket.disconnect();
+  });
 
   return {
     lobbyPlayers,
@@ -49,7 +48,7 @@ export const useAppStore = defineStore("app", () => {
 });
 
 export const useGameStore = defineStore("game", () => {
-  const game: Ref<GameState | null> = ref(null)
+  const game: Ref<GameState | null> = ref(null);
 
   //Helpers
 
@@ -57,46 +56,46 @@ export const useGameStore = defineStore("game", () => {
 
   // Getters
   const isGameStarted = computed(() => {
-    return game.value != null
-  })
+    return game.value != null;
+  });
 
-  const getPlayers = computed(()  => {
-    let playersMap = game.value?.players ?? {}
-    let players =  Object.values(playersMap) as Player[]
+  const getPlayers = computed(() => {
+    let playersMap = game.value?.players ?? {};
+    let players = Object.values(playersMap) as Player[];
 
-    players.sort((a, b) => a.turnOrder - b.turnOrder)
+    players.sort((a, b) => a.turnOrder - b.turnOrder);
 
-    return players
-  })
+    return players;
+  });
 
   const getCurrentPlayer = computed(() => {
-    return game.value?.currentPlayer ?? ""
-  })
+    return game.value?.currentPlayer ?? "";
+  });
 
   const getBankTokens = computed(() => {
     return (color: string) => {
-      let tokens = game.value?.tokenBank ?? []
-      return lookupTokens(tokens, color)
-    }
-  })
+      let tokens = game.value?.tokenBank ?? [];
+      return lookupTokens(tokens, color);
+    };
+  });
 
   const getShownDevelopments = computed(() => {
     return (deckIx: number) => {
       return game.value?.decks[deckIx][1] ?? [];
-    }
-  })
+    };
+  });
 
   // Event hooks
   onMounted(() => {
     $socket.onStateUpdate((update) => {
       // If this is the first state update the client is recieving, send an ack.
       if (game.value == null) {
-        $socket.sendReady()
+        $socket.sendReady();
       }
 
       game.value = update;
-    })
-  })
+    });
+  });
 
   return {
     // Exporting game for debugging reasons
@@ -109,84 +108,104 @@ export const useGameStore = defineStore("game", () => {
     getCurrentPlayer,
     getPlayers,
     getBankTokens,
-    getShownDevelopments
-  }
-})
+    getShownDevelopments,
+  };
+});
 
-export enum SelectDevelopmentMode { Purchase, Reserve, None }
+export enum SelectDevelopmentMode {
+  Purchase,
+  Reserve,
+  None,
+}
 export const useUiStore = defineStore("ui", () => {
   const selectedTokens: Ref<Set<String> | null> = ref(null);
   const selectAmount: Ref<number> = ref(0);
 
   // (deckIndex, developmentId)
   const selectedDevelopment: Ref<[number, number] | null> = ref(null);
-  const selectDevelopmentMode: Ref<SelectDevelopmentMode> = ref(SelectDevelopmentMode.None)
+  const selectDevelopmentMode: Ref<SelectDevelopmentMode> = ref(
+    SelectDevelopmentMode.None,
+  );
+
+  const goldAllocation: Ref<TokenPiles> = 
+    ref([
+      ["Black", 0],
+      ["White", 0],
+      ["Blue", 0],
+      ["Green", 0],
+      ["Red", 0],
+    ]);
 
   //Getters
   const isSelectingTokens = computed(() => {
     return selectedTokens.value != null;
-  })
+  });
 
-  const getSelectedTokens = computed(() => { let tokens = selectedTokens.value ?? new Set()
-    return tokens
-  })
+  const getSelectedTokens = computed(() => {
+    let tokens = selectedTokens.value ?? new Set();
+    return tokens;
+  });
 
   const remainingTokens = computed(() => {
     if (selectedTokens.value) {
-      return selectAmount.value - selectedTokens.value.size
+      return selectAmount.value - selectedTokens.value.size;
     } else {
-      return -1
+      return -1;
     }
-  })
+  });
 
   const getSelectDevelopmentMode = computed(() => {
-    return selectDevelopmentMode.value
-  })
+    return selectDevelopmentMode.value;
+  });
 
   const isDevelopmentSelected = computed(() => {
     return (devId: number) => {
       if (selectedDevelopment.value) {
-        return selectedDevelopment.value[1] == devId
+        return selectedDevelopment.value[1] == devId;
       } else {
-        return false
+        return false;
       }
-    }
-  })
+    };
+  });
 
   const doneSelectingDevelopment = computed(() => {
     if (selectedDevelopment.value) {
-      return selectedDevelopment.value[0] != -1
-            && selectedDevelopment.value[1] != -1
+      return (
+        selectedDevelopment.value[0] != -1 && selectedDevelopment.value[1] != -1
+      );
     } else {
-      return false
+      return false;
+    }
+  });
+
+  const getAllocatedGold = computed(() => {
+    return (color: string) => {
+      return lookupTokens(goldAllocation.value, color)
     }
   })
 
   //Actions
   function beginTokenSelect(amount: number) {
     if (amount == 1 || amount == 3) {
-      selectedTokens.value = new Set()
-      selectAmount.value = amount
+      selectedTokens.value = new Set();
+      selectAmount.value = amount;
     }
   }
 
   function toggleTokenSelected(color: string) {
     if (selectedTokens.value) {
       if (selectedTokens.value.has(color)) {
-        selectedTokens.value.delete(color)
+        selectedTokens.value.delete(color);
       } else if (selectedTokens.value.size < selectAmount.value) {
         // Only add selection if less than the desired amount are selected
-        selectedTokens.value.add(color)
+        selectedTokens.value.add(color);
       }
     }
   }
 
   function submitAcquireTokens() {
     if (selectedTokens.value) {
-      $socket.sendAction(
-        "AcquireTokens",
-        Array.from(selectedTokens.value),
-      );
+      $socket.sendAction("AcquireTokens", Array.from(selectedTokens.value));
       selectedTokens.value = null;
       selectAmount.value = 0;
     }
@@ -194,30 +213,71 @@ export const useUiStore = defineStore("ui", () => {
 
   function beginDevelopmentSelect(mode: SelectDevelopmentMode) {
     selectDevelopmentMode.value = mode;
-    selectedDevelopment.value = [-1, -1]
+    selectedDevelopment.value = [-1, -1];
   }
 
   function toggleDevelopmentSelected(deckIx: number, devId: number) {
     if (selectedDevelopment.value) {
       if (selectedDevelopment.value[1] == devId) {
-        selectedDevelopment.value = [-1, -1]
+        selectedDevelopment.value = [-1, -1];
       } else {
-        selectedDevelopment.value = [deckIx, devId]
+        selectedDevelopment.value = [deckIx, devId];
       }
     }
   }
 
-  function submitDevelopmentAction() {
-    if (selectedDevelopment.value && doneSelectingDevelopment.value) {
-      if (selectDevelopmentMode.value == SelectDevelopmentMode.Purchase) {
-        $socket.sendAction("PurchaseDevelopment", selectedDevelopment.value)
-      } 
-      else if (selectDevelopmentMode.value == SelectDevelopmentMode.Reserve) {
-        $socket.sendAction("ReserveDevelopment", selectedDevelopment.value)
-      }
+
+  function submitPurchaseAction() {
+    if (
+      selectedDevelopment.value &&
+      doneSelectingDevelopment.value &&
+      selectDevelopmentMode.value == SelectDevelopmentMode.Purchase
+    ) {
+      let [deckIx, devId] = selectedDevelopment.value;
+      $socket.sendAction("PurchaseDevelopment", [
+        deckIx,
+        devId,
+        []
+        // goldAllocation,
+      ]);
     }
     selectDevelopmentMode.value = SelectDevelopmentMode.None;
     selectedDevelopment.value = null;
+  }
+
+  function submitReserveAction() {
+    if (
+      selectedDevelopment.value &&
+      doneSelectingDevelopment.value &&
+      selectDevelopmentMode.value == SelectDevelopmentMode.Reserve
+    ) {
+      $socket.sendAction("ReserveDevelopment", selectedDevelopment.value);
+    }
+    selectDevelopmentMode.value = SelectDevelopmentMode.None;
+    selectedDevelopment.value = null;
+  }
+
+  function resetAllocatedGold() {
+    goldAllocation.value = [
+      ["Black", 0],
+      ["White", 0],
+      ["Blue", 0],
+      ["Green", 0],
+      ["Red", 0],
+    ]
+  }
+
+  function allocateGold(color: string, deallocate = false) {
+    //Doing a "dumb" for-loop because I don't feel 
+    console.log("allocating gold ", color)
+    // like googling map for the millionth time
+    for (let i = 0; i < goldAllocation.value.length; i++) {
+      if (goldAllocation.value[i][0] == color) {
+        let delta = deallocate ? -1 : 1;
+        console.log(delta)
+        goldAllocation.value[i][1] += delta  
+      }
+    }
   }
 
   return {
@@ -229,6 +289,8 @@ export const useUiStore = defineStore("ui", () => {
     getSelectDevelopmentMode,
     isDevelopmentSelected,
     doneSelectingDevelopment,
+
+    getAllocatedGold,
     // Actions
     beginTokenSelect,
     toggleTokenSelected,
@@ -236,6 +298,11 @@ export const useUiStore = defineStore("ui", () => {
 
     beginDevelopmentSelect,
     toggleDevelopmentSelected,
-    submitDevelopmentAction,
+    submitPurchaseAction,
+    submitReserveAction,
+
+    resetAllocatedGold,
+    allocateGold,
+
   };
 });
