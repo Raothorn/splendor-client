@@ -23,7 +23,7 @@ class SocketManager {
     if (mode == "development") {
       this.socket = new WebSocket("ws://localhost:9001")
     } else {
-      this.socket = new WebSocket("http://ops-foundry.com/splendorws");
+      this.socket = new WebSocket("ws://ec2-3-16-161-191.us-east-2.compute.amazonaws.com:9001")
     }
   }
 

@@ -42,7 +42,6 @@ const app = useAppStore();
 const ui = useUiStore();
 
 const chooseActionDialog = ref(false);
-const allocateGoldDialog = ref(false)
 
 const buttonData = computed(() => {
   let onClick = () => {};
