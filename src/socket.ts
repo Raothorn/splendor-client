@@ -10,13 +10,13 @@ class SocketManager {
 
   private socket: WebSocket
 
-  public guid: string;
+  private _guid: string;
 
   constructor() {
     this._onLobbyUpdate = (_) => {}
     this._onStateUpdate = (_) => {}
     this._onLobbyJoinSuccess = () => {}
-    this.guid = uuidv4()
+    this._guid = this.getGuid();
 
     let mode = import.meta.env.MODE;
     console.log("MODE: ", mode)
@@ -27,11 +27,24 @@ class SocketManager {
     }
   }
 
+  private getGuid():string {
+
+    const key = "splendor_guid"
+    let result = localStorage.getItem(key)
+
+    if (result == null) {
+      result = uuidv4()
+      localStorage.setItem(key, result)
+   }
+
+   return result
+  }
+
   connect() {
     this.socket.onopen = (_) => {
       console.log("Connecting to server.")
 
-      let connectionRequest = { tag: "ConnectRequest", contents: this.guid};
+      let connectionRequest = { tag: "ConnectRequest", contents: this._guid};
       this.socket.send(JSON.stringify(connectionRequest))
     };
 
