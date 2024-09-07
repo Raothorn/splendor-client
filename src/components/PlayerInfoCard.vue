@@ -37,23 +37,6 @@
               <h5>{{ developmentGems(color) }}</h5>
             </li>
 
-            <template v-if="isYou()">
-              <li>
-                <img class="token-icon" src="/assets/token_gold.png" alt="" />
-              </li>
-              <li v-for="color in tokenColors">
-                <v-sheet
-                  @click="ui.allocateGold(color, true)"
-                  v-if="ui.getAllocatedGold(color) > 0"
-                  class="deallocate-gold-btn"
-                  elevation="24"
-                >
-                  <h5>{{ ui.getAllocatedGold(color) }}</h5>
-                </v-sheet>
-                <h5 v-else>0</h5>
-              </li>
-            </template>
-
             <div class="row-divider"></div>
             <li>
               <h4><v-icon icon="mdi-sigma"></v-icon></h4>
@@ -66,42 +49,8 @@
         <div class="player-footer">
           <h4>VP: 0</h4>
           <div class="player-gold">
-            <template v-if="isYou() && goldAmt > 0">
-              <v-btn class="allocate-gold-btn" variant="outlined">
-                <img class="token-icon" src="/assets/token_gold.png" alt="" />
-                <h4>{{ goldAmt }}</h4>
-                <v-snackbar
-                  activator="parent"
-                  location-strategy="connected"
-                  location="top center"
-                  target="parent"
-                  open-on-click
-                  :open-on-hover="false"
-                >
-                  <v-card class="w-100">
-                    <v-card-title>Allocate gold</v-card-title>
-                    <v-card-actions>
-                      <div class="d-flex justify-space-evenly ml-2 w-100">
-                        <v-btn
-                          class="px-0 mx-0"
-                          v-for="color in tokenColors"
-                          @click="ui.allocateGold(color)"
-                        >
-                          <img
-                            class="token-icon mx-1"
-                            :src="getTokenImgUrl(color)"
-                          />
-                        </v-btn>
-                      </div>
-                    </v-card-actions>
-                  </v-card>
-                </v-snackbar>
-              </v-btn>
-            </template>
-            <template v-else>
-              <img class="token-icon" src="/assets/token_gold.png" alt="" />
-              <h4>{{ goldAmt }}</h4>
-            </template>
+            <img class="token-icon" src="/assets/token_gold.png" alt="" />
+            <h4>{{ goldAmt }}</h4>
           </div>
           <div class="player-reserved-developments">
             <p>Reserved developments</p>
@@ -157,7 +106,7 @@ function tokenGems(color: string) {
 }
 
 function developmentGems(color: string) {
-  return 0;
+  return lookupTokens(props.player.developmentGems, color)
 }
 
 function getTokenImgUrl(color: string) {

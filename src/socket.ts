@@ -27,7 +27,7 @@ class SocketManager {
     }
   }
 
-  private getGuid():string {
+  getGuid():string {
 
     const key = "splendor_guid"
     let result = sessionStorage.getItem(key)

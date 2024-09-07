@@ -11,7 +11,7 @@ export type LobbyState = {
 
 export type Player = {
   tokens: TokenPiles
-  gold: number
+  developmentGems: TokenPiles
   ownedDevelopments: DevelopmentId[]
   reservedDevelopments: DevelopmentId[]
   victoryPoints: number

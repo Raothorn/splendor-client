@@ -68,6 +68,13 @@ export const useGameStore = defineStore("game", () => {
     return players;
   });
 
+  // Gets the actual player of the user
+  const getPlayer = computed(() => {
+    let players = game.value?.players ?? {};
+    let playersMap: Map<string, Player> = new Map(Object.entries(players))
+    return playersMap.get($socket.getGuid()) ?? null
+  })
+
   const getCurrentPlayer = computed(() => {
     return game.value?.currentPlayer ?? "";
   });
@@ -105,6 +112,7 @@ export const useGameStore = defineStore("game", () => {
     //Getters
     isGameStarted,
 
+    getPlayer,
     getCurrentPlayer,
     getPlayers,
     getBankTokens,
@@ -185,6 +193,20 @@ export const useUiStore = defineStore("ui", () => {
   })
 
   //Actions
+  function cancelAction() {
+    selectedTokens.value = null;
+    selectAmount.value = 0;
+    selectedDevelopment.value = null;
+    selectDevelopmentMode.value = SelectDevelopmentMode.None;
+    goldAllocation.value = [
+      ["Black", 0],
+      ["White", 0],
+      ["Blue", 0],
+      ["Green", 0],
+      ["Red", 0],
+    ]
+  }
+
   function beginTokenSelect(amount: number) {
     if (amount == 1 || amount == 3) {
       selectedTokens.value = new Set();
@@ -209,6 +231,7 @@ export const useUiStore = defineStore("ui", () => {
       selectedTokens.value = null;
       selectAmount.value = 0;
     }
+    cancelAction()
   }
 
   function beginDevelopmentSelect(mode: SelectDevelopmentMode) {
@@ -226,7 +249,6 @@ export const useUiStore = defineStore("ui", () => {
     }
   }
 
-
   function submitPurchaseAction() {
     if (
       selectedDevelopment.value &&
@@ -237,12 +259,10 @@ export const useUiStore = defineStore("ui", () => {
       $socket.sendAction("PurchaseDevelopment", [
         deckIx,
         devId,
-        []
-        // goldAllocation,
+        goldAllocation.value,
       ]);
     }
-    selectDevelopmentMode.value = SelectDevelopmentMode.None;
-    selectedDevelopment.value = null;
+    cancelAction()
   }
 
   function submitReserveAction() {
@@ -253,18 +273,7 @@ export const useUiStore = defineStore("ui", () => {
     ) {
       $socket.sendAction("ReserveDevelopment", selectedDevelopment.value);
     }
-    selectDevelopmentMode.value = SelectDevelopmentMode.None;
-    selectedDevelopment.value = null;
-  }
-
-  function resetAllocatedGold() {
-    goldAllocation.value = [
-      ["Black", 0],
-      ["White", 0],
-      ["Blue", 0],
-      ["Green", 0],
-      ["Red", 0],
-    ]
+    cancelAction()
   }
 
   function allocateGold(color: string, deallocate = false) {
@@ -291,7 +300,9 @@ export const useUiStore = defineStore("ui", () => {
     doneSelectingDevelopment,
 
     getAllocatedGold,
+
     // Actions
+    cancelAction,
     beginTokenSelect,
     toggleTokenSelected,
     submitAcquireTokens,
@@ -301,8 +312,6 @@ export const useUiStore = defineStore("ui", () => {
     submitPurchaseAction,
     submitReserveAction,
 
-    resetAllocatedGold,
     allocateGold,
-
   };
 });
