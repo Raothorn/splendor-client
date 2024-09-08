@@ -18,8 +18,9 @@
 import Lobby from '@/components/Lobby.vue';
 import MainBoard from '@/components/MainBoard.vue';
 import Rejoin from '@/components/Rejoin.vue';
+import { useAppStore } from '@/stores/appStores';
+import { useGameStore } from '@/stores/gameStore';
 
-import { useAppStore, useGameStore } from '@/stores/appStores';
 
 const game = useGameStore()
 // This is necessary

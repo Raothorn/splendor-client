@@ -1,7 +1,7 @@
 <template>
-  <v-card class="player-info-card">
+  <v-card class="player-info-card" :class="{ inactive: !isTurn()}">
     <v-card-title>
-      <h3>Player {{ player.username }}</h3>
+      <h3>{{ player.username }}</h3>
     </v-card-title>
     <v-card-subtitle>
       <h4 :class="isYou() ? '' : 'hidden'">(you)</h4>
@@ -60,7 +60,9 @@
                   <img :src="`/assets/developments_1/${reserved}.png`" />
                 </v-tooltip>
                 <img
+                  @click="selectReservedDevelopment(reserved)"
                   class="development-icon"
+                  :class="ui.isDevelopmentSelected(reserved) ? 'selected' : ''"
                   :src="`/assets/developments_1/${reserved}.png`"
                 />
               </li>
@@ -76,7 +78,9 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useUiStore } from "@/stores/appStores";
+import { useAppStore } from "@/stores/appStores";
+import { useGameStore } from "@/stores/gameStore";
+import { SelectDevelopmentMode, useUiStore } from "@/stores/uiStore";
 import { lookupTokens, Player, tokenColors } from "@/types/gamestate";
 
 const props = defineProps<{
@@ -84,21 +88,26 @@ const props = defineProps<{
 }>();
 
 const app = useAppStore();
+const game = useGameStore();
 const ui = useUiStore();
 
 const goldAmt = computed(() => {
   let totalGold = tokenGems("Gold");
-  if (isYou()) {
-    for (let color of tokenColors) {
-      let allocatedAmt = ui.getAllocatedGold(color);
-      totalGold -= allocatedAmt;
-    }
-  }
   return totalGold;
 });
 
 function isYou() {
   return props.player.username == app.username;
+}
+
+function isTurn() {
+  return props.player.username == game.getCurrentTurnPlayer
+}
+
+function selectReservedDevelopment(username: string, devId: number) {
+  if (isYou() && ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase) {
+    ui.toggleDevelopmentSelected(devId)
+  }
 }
 
 function tokenGems(color: string) {
@@ -118,6 +127,10 @@ function getTokenImgUrl(color: string) {
 ul,
 li {
   list-style-type: none;
+}
+
+.inactive {
+  opacity: 0.75;
 }
 
 .hidden {
@@ -232,6 +245,11 @@ h5 {
 .v-snackbar__content {
   padding: 0px;
 }
+
+.selected {
+  transform: scale(1.1)
+}
+
 
 /*if there is enough height to put the footer at the bottom*/
 /* @media (min-height: 800px) {

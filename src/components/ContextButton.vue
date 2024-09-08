@@ -40,82 +40,45 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-  <v-dialog v-model="allocateGoldDialog" max-width="500">
-    <v-card>
-      <v-card-title>Allocate Gold</v-card-title>
-      <v-card-actions>
-        <div class="d-flex flex-column justify-center w-100">
-          <div class="d-flex justify-center w-100 my-2">
-            <div class="d-flex flex-column justify-center align-center mr-2">
-              <img class="token-icon-med my-2" :src="getTokenImgUrl('Gold')" />
-              <h3>{{ goldAmt }}</h3>
-            </div>
-            <div v-for="color in tokenColors" class="d-flex flex-column">
-              <div class="d-flex flex-column align-center">
-                <v-btn
-                  @click="ui.allocateGold(color, true)"
-                  icon="mdi-minus-circle-outline"
-                  :disabled="ui.getAllocatedGold(color) <= 0"
-                ></v-btn>
-                <img class="token-icon-small" :src="getTokenImgUrl(color)" />
-                <v-btn
-                  @click="ui.allocateGold(color)"
-                  icon="mdi-plus-circle-outline"
-                  :disabled="goldAmt <= 0"
-                ></v-btn>
-                <h4>{{ ui.getAllocatedGold(color) }}</h4>
-              </div>
-            </div>
-          </div>
-          <div class="allocate-gold-actions">
-            <v-btn @click="submitPurchase" variant="tonal"> Purchase </v-btn>
-            <v-btn @click="cancelPurchase" class="" variant="tonal"> Cancel </v-btn>
-          </div>
-        </div>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script setup lang="ts">
-import {
-  SelectDevelopmentMode,
-  useAppStore,
-  useGameStore,
-  useUiStore,
-} from "@/stores/appStores";
-import { lookupTokens, tokenColors } from "@/types/gamestate";
+import { useAppStore } from "@/stores/appStores";
+import { useGameStore } from "@/stores/gameStore";
+import { SelectDevelopmentMode, useUiStore } from "@/stores/uiStore";
 
 const game = useGameStore();
 const app = useAppStore();
 const ui = useUiStore();
 
 const chooseActionDialog = ref(false);
-const allocateGoldDialog = ref(false);
 
 const buttonData = computed(() => {
   let onClick = () => {};
   let disabled = false;
   let contents = "hi";
-  let cancelButton = false;
+  let cancelButton = true;
 
   if (ui.isSelectingTokens) {
     if (ui.remainingTokens > 0) {
       contents = `Select ${ui.remainingTokens} more tokens`;
       disabled = true;
-      cancelButton = true
     } else {
       contents = "Acquire tokens";
       onClick = ui.submitAcquireTokens;
     }
   } else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase) {
     if (ui.doneSelectingDevelopment) {
-      contents = "Purchase Development";
-      onClick = () => (allocateGoldDialog.value = true);
+      if (ui.canAffordSelectedDevelopment) {
+        contents = "Purchase Development";
+        onClick = () => ui.beginAllocatingGold()
+      } else {
+        contents = "Cannot afford development. Select another."
+        disabled = true
+      }
     } else {
       contents = "Select development to purchase";
       disabled = true;
-      cancelButton = true
     }
   } else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Reserve) {
     if (ui.doneSelectingDevelopment) {
@@ -124,14 +87,15 @@ const buttonData = computed(() => {
     } else {
       contents = "Select development to reserve";
       disabled = true;
-      cancelButton = true
     }
   } else if (yourTurn()) {
     contents = "Your turn Choose action";
     onClick = () => (chooseActionDialog.value = true);
+    cancelButton = false;
   } else {
     contents = "Waiting...";
     disabled = true;
+    cancelButton = false;
   }
 
   return {
@@ -142,32 +106,11 @@ const buttonData = computed(() => {
   };
 });
 
-const goldAmt = computed(() => {
-  let playerGold = 0;
-  let player = game.getPlayer;
-  if (player) {
-    playerGold = lookupTokens(player.tokens, "Gold");
-  }
-
-  for (let color of tokenColors) {
-    playerGold -= ui.getAllocatedGold(color);
-  }
-  return playerGold;
-});
 
 function yourTurn() {
-  return game.getCurrentPlayer == app.username;
+  return game.getCurrentTurnPlayer == app.username;
 }
 
-function cancelPurchase() {
-  ui.cancelAction()
-  allocateGoldDialog.value = false
-}
-
-function submitPurchase() {
-  ui.submitPurchaseAction();
-  allocateGoldDialog.value = false;
-}
 
 function purchaseDevelopment() {
   ui.beginDevelopmentSelect(SelectDevelopmentMode.Purchase);
@@ -189,15 +132,9 @@ function take2() {
   chooseActionDialog.value = false;
 }
 
-function getTokenImgUrl(color: string) {
-  return `/assets/token_${color.toLowerCase()}.png`;
-}
 </script>
 
 <style scoped>
-.v-card-title {
-  text-align: center;
-}
 .action-button {
   max-height: 100%;
 
@@ -219,16 +156,6 @@ function getTokenImgUrl(color: string) {
 }
 .button-contents h3 {
   text-wrap: wrap;
-}
-.token-icon-med {
-  display: block;
-  width: 40px;
-  height: 40px;
-}
-.token-icon-small {
-  display: block;
-  width: 20px;
-  height: 20px;
 }
 
 .allocate-gold-actions {

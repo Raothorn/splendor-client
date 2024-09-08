@@ -1,19 +1,14 @@
 <template>
   <v-card class="w-50 mx-auto my-10">
-    <v-card-title>Current game</v-card-title>
+    <v-card-title class="text-center">Rejoin ongoing game</v-card-title>
     <v-card-text>
       <v-table>
-        <thead>
-          <tr>
-            <h1>Players</h1>
-          </tr>
-        </thead>
         <tbody>
-          <tr v-for="player in game.getPlayers">
+          <tr>
             <td>
               <div class="d-flex justify-space-between align-end">
-                <h3>{{ player.username }}</h3>
-                <v-btn @click="rejoin(player.username)" variant="tonal">Rejoin</v-btn>
+                <h3>{{ username }}</h3>
+                <v-btn @click="rejoin(username)" variant="tonal">Rejoin</v-btn>
               </div>
             </td>
           </tr>
@@ -26,10 +21,16 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useGameStore } from "@/stores/appStores";
+import { useAppStore } from '@/stores/appStores';
+import { useGameStore } from '@/stores/gameStore';
+
 
 const app = useAppStore();
 const game = useGameStore();
+
+const username = computed(() => {
+  return game.getUserPlayer?.username ?? "";
+})
 
 function rejoin(rejoinAs: string) {
   app.username = rejoinAs;

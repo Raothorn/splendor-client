@@ -1,4 +1,5 @@
 <template>
+  <AllocateGoldDialog></AllocateGoldDialog>
   <div class="main-panel">
     <div class="token-bank">
       <TokenBank></TokenBank>
@@ -22,6 +23,7 @@ import TokenBank from "./TokenBank.vue";
 import PlayerInfoPanel from "./PlayerInfoPanel.vue";
 import Cards from "./Cards.vue";
 import ContextButton from "./ContextButton.vue";
+import AllocateGoldDialog from "./AllocateGoldDialog.vue";
 
 </script>
 
