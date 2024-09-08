@@ -19,7 +19,6 @@ class SocketManager {
     this._guid = this.getGuid();
 
     let mode = import.meta.env.MODE;
-    console.log("MODE: ", mode)
     if (mode == "development") {
       this.socket = new WebSocket("ws://localhost:9001")
     } else {
@@ -27,8 +26,7 @@ class SocketManager {
     }
   }
 
-  private getGuid():string {
-
+  getGuid():string {
     const key = "splendor_guid"
     let result = sessionStorage.getItem(key)
 
@@ -49,7 +47,6 @@ class SocketManager {
     };
 
     this.socket.onmessage = (event) => {
-      console.log("recieved message: ", event.data)
       let response = JSON.parse(event.data)
       if (response.tag == "GameUpdate") {
         this._onStateUpdate(response.contents)
@@ -92,10 +89,31 @@ class SocketManager {
     this._onLobbyJoinSuccess = fn
   }
 
-  sendAction(actionType: string, actionData: object) {
-    let actionMsg = { tag: actionType, contents: actionData };
+  async query(requestType: string, requestData: any) {
+    const requestTag = requestType + "Q"
+    const responseTag = requestType + "R"
 
-    this.socket.send(JSON.stringify(actionMsg));
+    let queryMsg = {tag: requestTag, contents: requestData}
+    let queryResponse = {tag: "QueryRequest", contents: queryMsg}
+    this.socket.send(JSON.stringify(queryResponse))
+
+    return new Promise((resolve, reject) => {
+      let listener = (e: MessageEvent) => {
+        let data = JSON.parse(e.data)
+        if (data.tag == "QueryResponse" && data.contents.tag == responseTag) {
+          resolve(data.contents.contents)
+          this.socket.removeEventListener("message", listener)
+        } 
+      }
+      this.socket.addEventListener("message", listener)
+    })
+  }
+
+  sendAction(actionType: string, actionData: any) {
+    let actionMsg = { tag: actionType, contents: actionData };
+    let actionRequest = { tag: "ActionRequest", contents: actionMsg }
+
+    this.socket.send(JSON.stringify(actionRequest));
   }
 
   sendReady() {

@@ -1,14 +1,23 @@
 <template>
-  <v-btn
-    @click="buttonData.onClick"
-    class="action-button"
-    block
-    :disabled="buttonData.disabled"
-  >
-    <div class="button-contents">
-      <h3> {{ buttonData.contents }} </h3>
-    </div>
-  </v-btn>
+  <div class="d-flex flex-column fill-height">
+    <v-btn
+      @click="buttonData.onClick"
+      class="action-button"
+      block
+      :disabled="buttonData.disabled"
+    >
+      <div class="button-contents">
+        <h3>{{ buttonData.contents }}</h3>
+      </div>
+    </v-btn>
+    <v-btn 
+      v-if="buttonData.cancelButton"
+      @click="ui.cancelAction"
+      class="cancel-button"
+    >
+    Cancel
+    </v-btn>
+  </div>
 
   <v-dialog v-model="chooseActionDialog" max-width="500">
     <v-card>
@@ -31,11 +40,12 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-
 </template>
 
 <script setup lang="ts">
-import { SelectDevelopmentMode, useAppStore, useGameStore, useUiStore } from "@/stores/appStores";
+import { useAppStore } from "@/stores/appStores";
+import { useGameStore } from "@/stores/gameStore";
+import { SelectDevelopmentMode, useUiStore } from "@/stores/uiStore";
 
 const game = useGameStore();
 const app = useAppStore();
@@ -47,55 +57,60 @@ const buttonData = computed(() => {
   let onClick = () => {};
   let disabled = false;
   let contents = "hi";
+  let cancelButton = true;
 
   if (ui.isSelectingTokens) {
     if (ui.remainingTokens > 0) {
-      contents = `Select ${ui.remainingTokens} more tokens`
-      disabled = true
+      contents = `Select ${ui.remainingTokens} more tokens`;
+      disabled = true;
     } else {
-      contents = "Acquire tokens"
-      onClick = ui.submitAcquireTokens
+      contents = "Acquire tokens";
+      onClick = ui.submitAcquireTokens;
     }
-  }
-  else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase) {
+  } else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase) {
     if (ui.doneSelectingDevelopment) {
-      contents = "Purchase Development"
-      onClick = () => ui.submitPurchaseAction()
+      if (ui.canAffordSelectedDevelopment) {
+        contents = "Purchase Development";
+        onClick = () => ui.beginAllocatingGold()
+      } else {
+        contents = "Cannot afford development. Select another."
+        disabled = true
+      }
+    } else {
+      contents = "Select development to purchase";
+      disabled = true;
     }
-    else {
-      contents = "Select development to purchase"
-      disabled = true
-    }
-  }
-  else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Reserve) {
+  } else if (ui.getSelectDevelopmentMode == SelectDevelopmentMode.Reserve) {
     if (ui.doneSelectingDevelopment) {
-      contents = "Reserve development"
-      onClick = () => ui.submitReserveAction()
+      contents = "Reserve development";
+      onClick = () => ui.submitReserveAction();
+    } else {
+      contents = "Select development to reserve";
+      disabled = true;
     }
-    else {
-      contents = "Select development to reserve"
-      disabled = true
-    }
-  }
-  else if (yourTurn()) {
-    contents = "Your turn Choose action"
-    onClick = () => chooseActionDialog.value = true
-  }
-  else {
-    contents = "Waiting..."
-    disabled=true;
+  } else if (yourTurn()) {
+    contents = "Your turn Choose action";
+    onClick = () => (chooseActionDialog.value = true);
+    cancelButton = false;
+  } else {
+    contents = "Waiting...";
+    disabled = true;
+    cancelButton = false;
   }
 
   return {
     onClick: onClick,
     disabled: disabled,
-    contents: contents
-  }
-})
+    contents: contents,
+    cancelButton: cancelButton,
+  };
+});
 
-function yourTurn()  {
-  return game.getCurrentPlayer == app.username;
+
+function yourTurn() {
+  return game.getCurrentTurnPlayer == app.username;
 }
+
 
 function purchaseDevelopment() {
   ui.beginDevelopmentSelect(SelectDevelopmentMode.Purchase);
@@ -116,19 +131,22 @@ function take2() {
   ui.beginTokenSelect(1);
   chooseActionDialog.value = false;
 }
+
 </script>
 
 <style scoped>
-.v-card-title {
-  text-align: center;
-}
-
 .action-button {
-  height: 100%;
+  max-height: 100%;
 
-  border-radius: 0px;
+  border-radius: 5px;
+  border: 2px solid black;
   /* background-color: green; */
   /* opacity: 0.5; */
+}
+.cancel-button {
+  border-radius: 5px;
+  border: 2px solid black;
+  height: 40px;
 }
 .action-option-buttons {
   width: 100%;
@@ -138,5 +156,13 @@ function take2() {
 }
 .button-contents h3 {
   text-wrap: wrap;
+}
+
+.allocate-gold-actions {
+  display: flex;
+  justify-content: center;
+}
+.allocate-gold-actions .v-btn {
+  margin: 0px 4px;
 }
 </style>

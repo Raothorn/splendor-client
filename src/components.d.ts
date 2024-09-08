@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AllocateGoldDialog: typeof import('./components/AllocateGoldDialog.vue')['default']
     Cards: typeof import('./components/Cards.vue')['default']
     ContextButton: typeof import('./components/ContextButton.vue')['default']
     Lobby: typeof import('./components/Lobby.vue')['default']

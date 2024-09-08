@@ -6,7 +6,9 @@
 </template>
 
 <script setup lang="ts">
-import { useGameStore, useUiStore } from "@/stores/appStores";
+import { useGameStore } from '@/stores/gameStore';
+import { useUiStore } from '@/stores/uiStore';
+
 
 const props = defineProps<{ color: string;
 }>();

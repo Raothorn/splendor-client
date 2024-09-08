@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { useUiStore } from "@/stores/appStores";
+import { useUiStore } from "@/stores/uiStore";
 import TokenPile from "./TokenPile.vue";
 import { tokenColors } from "@/types/gamestate";
 

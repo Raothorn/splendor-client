@@ -12,7 +12,7 @@
           <div
             class="development-card"
             :class="ui.isDevelopmentSelected(devId) ? 'selected' : 'unselected'"
-            @click="ui.toggleDevelopmentSelected(3 - index, devId)"
+            @click="onCardClick(devId)"
           >
             <img :src="getDevelopmentImg(devId)" alt="" />
           </div>
@@ -23,10 +23,18 @@
 </template>
 
 <script setup lang="ts">
-import { useGameStore, useUiStore } from "@/stores/appStores";
+import { useGameStore } from '@/stores/gameStore';
+import { SelectDevelopmentMode, useUiStore } from '@/stores/uiStore';
+
 
 const game = useGameStore();
 const ui = useUiStore();
+
+function onCardClick(devId: numer) {
+  if (ui.getSelectDevelopmentMode != SelectDevelopmentMode.None) {
+    ui.toggleDevelopmentSelected(devId)
+  }
+}
 
 function getDevelopmentImg(devId: number) {
   return `./assets/developments_1/${devId}.png`;
