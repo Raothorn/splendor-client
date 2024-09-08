@@ -1,5 +1,5 @@
 <template>
-  <v-card class="player-info-card" :class="{ inactive: !isTurn()}">
+  <v-card class="player-info-card" :class="{ inactive: !isTurn() }">
     <v-card-title>
       <h3>{{ player.username }}</h3>
     </v-card-title>
@@ -78,40 +78,43 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/stores/appStores";
-import { useGameStore } from "@/stores/gameStore";
-import { SelectDevelopmentMode, useUiStore } from "@/stores/uiStore";
-import { lookupTokens, Player, tokenColors } from "@/types/gamestate";
+import { useAppStore } from "@/stores/appStores"
+import { useGameStore } from "@/stores/gameStore"
+import { SelectDevelopmentMode, useUiStore } from "@/stores/uiStore"
+import { lookupTokens, Player, tokenColors } from "@/types/gamestate"
 
 const props = defineProps<{
-  player: Player;
-}>();
+  player: Player
+}>()
 
-const app = useAppStore();
-const game = useGameStore();
-const ui = useUiStore();
+const app = useAppStore()
+const game = useGameStore()
+const ui = useUiStore()
 
 const goldAmt = computed(() => {
-  let totalGold = tokenGems("Gold");
-  return totalGold;
-});
+  let totalGold = tokenGems("Gold")
+  return totalGold
+})
 
 function isYou() {
-  return props.player.username == app.username;
+  return props.player.username == app.username
 }
 
 function isTurn() {
   return props.player.username == game.getCurrentTurnPlayer
 }
 
-function selectReservedDevelopment(username: string, devId: number) {
-  if (isYou() && ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase) {
+function selectReservedDevelopment(devId: number) {
+  if (
+    isYou() &&
+    ui.getSelectDevelopmentMode == SelectDevelopmentMode.Purchase
+  ) {
     ui.toggleDevelopmentSelected(devId)
   }
 }
 
 function tokenGems(color: string) {
-  return lookupTokens(props.player.tokens, color);
+  return lookupTokens(props.player.tokens, color)
 }
 
 function developmentGems(color: string) {
@@ -119,7 +122,7 @@ function developmentGems(color: string) {
 }
 
 function getTokenImgUrl(color: string) {
-  return `/assets/token_${color.toLowerCase()}.png`;
+  return `/assets/token_${color.toLowerCase()}.png`
 }
 </script>
 
@@ -247,21 +250,6 @@ h5 {
 }
 
 .selected {
-  transform: scale(1.1)
+  transform: scale(1.1);
 }
-
-
-/*if there is enough height to put the footer at the bottom*/
-/* @media (min-height: 800px) {
-  .player-card {
-    flex-direction: column;
-  }
-  .player-footer {
-    height: 24px;
-    width: 90%;
-    margin-top: 4px;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-} */
 </style>
