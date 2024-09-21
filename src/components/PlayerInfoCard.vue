@@ -47,10 +47,58 @@
           </ul>
         </div>
         <div class="player-footer">
-          <h4>VP: 0</h4>
-          <div class="player-gold">
-            <img class="token-icon" src="/assets/token_gold.png" alt="" />
-            <h4>{{ goldAmt }}</h4>
+          <div class="d-flex justify-space-evenly align-center">
+            <div class="d-flex align-center">
+              <h4>VP: {{ player.victoryPoints }}</h4>
+              <v-btn
+                id="vp-info-btn"
+                class="info-btn"
+                icon="mdi-information-outline"
+                density="compact"
+                variant="flat"
+              >
+              </v-btn>
+              <v-tooltip
+                activator="parent"
+                location="top"
+              >
+                <v-card class="vp-tooltip">
+                  <v-card-title
+                    >{{ player.username }} Victory Points</v-card-title
+                  >
+                  <v-card-text>
+                    <div class="d-flex flex-column">
+                      <div class="d-flex align-center">
+                        <v-table>
+                          <tr>
+                            <td>Nobles</td>
+                            <td v-for="noble in player.nobles">
+                              <img
+                                class="noble-icon ml-3"
+                                :src="getNobleImgUrl(noble)"
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Developments</td>
+                            <td v-for="dev in player.ownedDevelopments">
+                              <img
+                                class="noble-icon ml-3"
+                                :src="getDevelopmentImgUrl(dev)"
+                              />
+                            </td>
+                          </tr>
+                        </v-table>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-tooltip>
+            </div>
+            <div class="player-gold">
+              <img class="token-icon" src="/assets/token_gold.png" alt="" />
+              <h4>{{ goldAmt }}</h4>
+            </div>
           </div>
           <div class="player-reserved-developments">
             <p>Reserved developments</p>
@@ -121,12 +169,20 @@ function developmentGems(color: string) {
   return lookupTokens(props.player.developmentGems, color)
 }
 
+function getDevelopmentImgUrl(devId: number) {
+  return `./assets/developments_1/${devId}.png`
+}
+
 function getTokenImgUrl(color: string) {
   return `/assets/token_${color.toLowerCase()}.png`
 }
+
+function getNobleImgUrl(nobleId: number) {
+  return `./assets/nobles/${nobleId}.webp`
+}
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 ul,
 li {
   list-style-type: none;
@@ -197,23 +253,25 @@ h5 {
   height: 90px;
   margin-left: 4px;
 
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
 }
 .player-footer h4 {
-  font-size: 1.4rem;
-  margin: auto 0px;
+  font-size: 1.2rem;
 }
+
+.info-btn {
+  --v-btn-size: 0.5rem;
+}
+
 .player-gold {
   min-height: 35px;
-  min-width: 75px;
   display: flex;
-  margin: 5px auto;
   justify-content: start;
   align-items: center;
 }
 .player-gold .token-icon {
-  margin: 0px 3px;
+  margin: 0px 8px;
 }
 .player-reserved-developments {
   min-height: 60px;
@@ -251,5 +309,10 @@ h5 {
 
 .selected {
   transform: scale(1.1);
+}
+.noble-icon {
+  max-width: 100px;
+  border-radius: 5px;
+  overflow: hidden;
 }
 </style>

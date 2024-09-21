@@ -14,6 +14,18 @@ export const useGameStore = defineStore("game", () => {
     return game.value != null
   })
 
+  const isGameOver = computed(() => {
+    return gameOverSummary.value != null
+  })
+
+  const gameOverSummary = computed(() => {
+    return game.value?.gameOverSummary ?? null
+  })
+
+  const messageLog = computed((): string[] => {
+    return game.value?.messageLog ?? []
+  })
+
   const getPlayers = computed(() => {
     let playersMap = game.value?.players ?? {}
     let players = Object.values(playersMap) as Player[]
@@ -41,12 +53,16 @@ export const useGameStore = defineStore("game", () => {
     }
   })
 
+  // TODO remove 'get' from getters
   const getShownDevelopments = computed(() => {
     return (deckIx: number) => {
       return game.value?.decks[deckIx][1] ?? []
     }
   })
 
+  const nobles = computed(() => {
+    return game.value?.nobles ?? []
+  })
   // Event hooks
   onMounted(() => {
     $socket.onStateUpdate((update) => {
@@ -63,14 +79,17 @@ export const useGameStore = defineStore("game", () => {
     // Exporting game for debugging reasons
     game,
 
+    messageLog,
     // Actions
     //Getters
     isGameStarted,
-
+    isGameOver,
+    gameOverSummary,
     getUserPlayer,
     getCurrentTurnPlayer,
     getPlayers,
     getBankTokens,
     getShownDevelopments,
+    nobles,
   }
 })

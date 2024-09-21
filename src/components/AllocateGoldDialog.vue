@@ -30,7 +30,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="[color, cost] in ui.selectedDevelopmentCost">
+            <tr v-for="[color, _] in ui.selectedDevelopmentCost">
               <td>
                 <img class="token-icon-small" :src="getTokenImgUrl(color)" />
               </td>
@@ -96,7 +96,7 @@ const ui = useUiStore()
 
 const remainingGold = computed(() => {
   let playerGold = 0
-  let player = game.getPlayer
+  let player = game.getUserPlayer
   if (player) {
     playerGold = lookupTokens(player.tokens, "Gold")
   }
@@ -118,7 +118,7 @@ const canPurchase = computed(() => {
 
 function canAllocate(color: string) {
   return remainingGold.value > 0
-      && spendTokenGems(color) > 0
+      && (spendTokenGems(color) > 0 || sumGems(color) < devCost(color))
 }
 
 function canDeallocate(color: string) {
@@ -138,7 +138,7 @@ function spendTokenGems(color: string) {
 }
 
 function tokenGems(color: string) {
-  let player = game.getPlayer
+  let player = game.getUserPlayer
   if (player) {
     return lookupTokens(player.tokens, color)
   } else {
@@ -147,7 +147,7 @@ function tokenGems(color: string) {
 }
 
 function devGems(color: string) {
-  let player = game.getPlayer
+  let player = game.getUserPlayer
   if (player) {
     return lookupTokens(player.developmentGems, color)
   } else {

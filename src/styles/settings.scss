@@ -5,8 +5,7 @@
  */
 
 // https://vuetifyjs.com/features/sass-variables/`
-@use 'vuetify/settings' with (
-  $color-pack: false,
-  $snackbar-content-padding: 0px 0px,
 
+@use 'vuetify/settings' with (
+  $tooltip-padding: 0px 0px,
 );

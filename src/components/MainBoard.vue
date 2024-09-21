@@ -1,30 +1,33 @@
 <template>
-  <AllocateGoldDialog></AllocateGoldDialog>
   <div class="main-panel">
-    <div class="token-bank">
-      <TokenBank></TokenBank>
-    </div>
     <div class="cards-panel">
       <Cards></Cards>
     </div>
-    <div class="main-footer">
-      <div class="player-info-panel">
-        <PlayerInfoPanel></PlayerInfoPanel>
-      </div>
-      <div class="">
-        <ContextButton></ContextButton>
-      </div>
+    <div class="nobles-panel">
+      <NoblesPanel></NoblesPanel>
+    </div>
+    <div class="token-bank">
+      <TokenBank></TokenBank>
+    </div>
+    <div class="player-info-panel">
+      <PlayerInfoPanel></PlayerInfoPanel>
+    </div>
+    <div class="context-button">
+      <ContextButton></ContextButton>
+    </div>
+    <div class="message-log">
+      <MessagePanel></MessagePanel>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import TokenBank from "./TokenBank.vue";
-import PlayerInfoPanel from "./PlayerInfoPanel.vue";
-import Cards from "./Cards.vue";
-import ContextButton from "./ContextButton.vue";
-import AllocateGoldDialog from "./AllocateGoldDialog.vue";
-
+import TokenBank from "./TokenBank.vue"
+import PlayerInfoPanel from "./PlayerInfoPanel.vue"
+import Cards from "./Cards.vue"
+import ContextButton from "./ContextButton.vue"
+import NoblesPanel from "./NoblesPanel.vue"
+import MessagePanel from "./MessagePanel.vue"
 </script>
 
 <style scoped>
@@ -32,19 +35,30 @@ import AllocateGoldDialog from "./AllocateGoldDialog.vue";
 .main-panel {
   height: 100vh;
   display: grid;
-  grid-template-rows: repeat(12, 1fr);
+  grid-template-columns: repeat(11, 1fr) 175px 300px;
+  grid-template-rows: minmax(50px, 5vh) 70vh minmax(200px, 25vh);
 }
-
+.message-log {
+  grid-column: 13/14;
+  grid-row: 1/4;
+  border-left: 2px solid black;
+}
+.nobles-panel {
+  grid-column: span 3;
+  border-bottom: 1px solid black;
+}
 .token-bank {
-  grid-row: span 1;
+  grid-column: span 9;
+  border-bottom: 2px solid black;
 }
 .cards-panel {
-  grid-row: span 8;
+  grid-column: span 12;
+  border-bottom: 1px solid black;
 }
-.main-footer{
-  grid-row: span 3;
-
-  display: grid;
-  grid-template-columns: 4fr 200px;
+.player-info-panel {
+  grid-column: span 11;
+}
+.context-button {
+  grid-column: span 1;
 }
 </style>

@@ -1,6 +1,4 @@
-import { GameState, lookupTokens, Player, TokenPiles } from "@/types/gamestate";
 import { defineStore } from "pinia";
-import { computedAsync } from "@vueuse/core";
 import $socket from "@/socket";
 
 export const useAppStore = defineStore("app", () => {

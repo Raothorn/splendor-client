@@ -30,7 +30,7 @@ import { SelectDevelopmentMode, useUiStore } from '@/stores/uiStore';
 const game = useGameStore();
 const ui = useUiStore();
 
-function onCardClick(devId: numer) {
+function onCardClick(devId: number) {
   if (ui.getSelectDevelopmentMode != SelectDevelopmentMode.None) {
     ui.toggleDevelopmentSelected(devId)
   }

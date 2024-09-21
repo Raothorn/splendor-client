@@ -22,7 +22,7 @@ class SocketManager {
     if (mode == "development") {
       this.socket = new WebSocket("ws://localhost:9001")
     } else {
-      this.socket = new WebSocket("ws://ec2-3-16-161-191.us-east-2.compute.amazonaws.com:9001")
+      this.socket = new WebSocket("ws://ec2-18-216-17-247.us-east-2.compute.amazonaws.com:9001")
     }
   }
 
@@ -58,12 +58,23 @@ class SocketManager {
         let username = response.contents
         this._onLobbyJoinSuccess(username)
       }
-      else if (response.tag == "ErrorNotification") {
-        toast(response.contents, {
-          theme: "dark",
-          type: "error",
-          autoClose: 1000,
-        }); // ToastOptions
+      else if (response.tag == "Notification") {
+        let [logEvent, logLevel] = response.contents
+
+        if (logLevel == "NotifyInfo") {
+          toast(logEvent, {
+            theme: "dark",
+            type: "info",
+            autoClose: 1000,
+          })
+        }
+        else if (logLevel == "NotifyError") {
+          toast(logEvent, {
+            theme: "dark",
+            type: "error",
+            autoClose: 1000,
+          })
+        }
       }
     };
   }

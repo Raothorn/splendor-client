@@ -28,7 +28,7 @@ function tokenClicked(color: string) {
   justify-content: space-between;
   
   height: 100%;
-  padding: 0px 100px;
+  padding: 0px 5px;
 }
 .selected {
   background-color: rgba(255, 255, 255, 0.2)
